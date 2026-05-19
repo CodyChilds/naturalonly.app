@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Natural Only — 100% Natural Fiber Clothing Search</title>
+  <meta name="description" content="The search engine for 100% natural fiber clothing. Cotton, linen, wool, cashmere, hemp. No synthetics. Ever." />
+  <meta property="og:title" content="Natural Only" />
+  <meta property="og:description" content="Search thousands of 100% natural fiber products. No blends. No synthetics. Ever." />
+  <meta property="og:url" content="https://naturalonly.app" />
+  <meta name='impact-site-verification' value='935ac66b-d05d-4570-a05c-3169e4ff9726' />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F7F4EF;
+      --cream: #EDE6D6;
+      --brown: #6B3F2A;
+      --taupe: #A89880;
+      --dark: #3a2518;
+      --text: #4a3728;
+      --light-text: #8a7a6a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2rem;
+      position: sticky;
+      top: 0;
+      background: rgba(247,244,239,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      border-bottom: 1px solid rgba(168,152,128,0.15);
+    }
+    .nav-wordmark {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      letter-spacing: -0.3px;
+    }
+    .nav-wordmark .natural { color: var(--brown); }
+    .nav-wordmark .only { color: var(--taupe); }
+    .nav-cta {
+      background: var(--brown);
+      color: var(--bg);
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 5rem 1.5rem 4rem;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      display: inline-block;
+      background: var(--cream);
+      color: var(--taupe);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 1.75rem;
+    }
+    .hero-wordmark {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(52px, 10vw, 80px);
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 1.5rem;
+    }
+    .hero-wordmark .natural { color: var(--brown); display: block; }
+    .hero-wordmark .only { color: var(--taupe); display: block; }
+    .hero-tagline {
+      font-size: 18px;
+      color: var(--light-text);
+      max-width: 420px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.65;
+    }
+    .fibers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 2.5rem;
+    }
+    .fiber {
+      background: var(--cream);
+      color: var(--brown);
+      border-radius: 20px;
+      padding: 7px 18px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .hero-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .btn-primary {
+      background: var(--brown);
+      color: var(--bg);
+      border: none;
+      border-radius: 12px;
+      padding: 16px 40px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.15s;
+      display: inline-block;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .hero-sub { font-size: 13px; color: var(--taupe); }
+
+    /* DIVIDER */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--cream);
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* HOW IT WORKS */
+    section { padding: 4rem 1.5rem; max-width: 680px; margin: 0 auto; }
+    .section-label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--taupe);
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(28px, 5vw, 38px);
+      color: var(--brown);
+      text-align: center;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.5px;
+    }
+    .section-sub {
+      text-align: center;
+      color: var(--light-text);
+      font-size: 15px;
+      max-width: 400px;
+      margin: 0 auto 3rem;
+      line-height: 1.65;
+    }
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+    .step {
+      background: var(--cream);
+      border-radius: 16px;
+      padding: 1.75rem 1.25rem;
+      text-align: center;
+    }
+    .step-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 40px;
+      color: var(--brown);
+      opacity: 0.35;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .step-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .step-text { font-size: 13px; color: var(--light-text); line-height: 1.55; }
+
+    /* FILTER SECTION */
+    .filter-section {
+      background: var(--brown);
+      padding: 4rem 1.5rem;
+    }
+    .filter-inner { max-width: 680px; margin: 0 auto; text-align: center; }
+    .filter-inner .section-label { color: rgba(237,230,214,0.6); }
+    .filter-inner .section-title { color: var(--cream); }
+    .filter-inner .section-sub { color: rgba(237,230,214,0.7); margin-bottom: 2rem; }
+    .no-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 2rem;
+    }
+    .no-tag {
+      background: rgba(247,244,239,0.1);
+      border: 1px solid rgba(237,230,214,0.25);
+      color: var(--cream);
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: 13px;
+    }
+    .no-tag.strikethrough { text-decoration: line-through; opacity: 0.5; }
+    .yes-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    .yes-tag {
+      background: rgba(237,230,214,0.15);
+      border: 1px solid rgba(237,230,214,0.4);
+      color: var(--cream);
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* PRICING */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 0;
+    }
+    @media (max-width: 480px) { .pricing-grid { grid-template-columns: 1fr; } }
+    .price-card {
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem;
+    }
+    .price-free { background: var(--cream); }
+    .price-pro { background: var(--brown); }
+    .price-tier {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .price-free .price-tier { color: var(--taupe); }
+    .price-pro .price-tier { color: rgba(237,230,214,0.65); }
+    .price-amount {
+      font-family: 'DM Serif Display', serif;
+      font-size: 38px;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .price-free .price-amount { color: var(--brown); }
+    .price-pro .price-amount { color: var(--bg); }
+    .price-period { font-size: 14px; font-weight: 300; }
+    .price-alt {
+      font-size: 12px;
+      margin-bottom: 1.25rem;
+      margin-top: 6px;
+    }
+    .price-free .price-alt { color: var(--taupe); }
+    .price-pro .price-alt { color: rgba(237,230,214,0.6); }
+    .save-badge {
+      display: inline-block;
+      background: var(--taupe);
+      color: white;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    .price-features { list-style: none; }
+    .price-features li {
+      font-size: 13px;
+      padding: 5px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .price-free .price-features li { color: var(--text); }
+    .price-pro .price-features li { color: rgba(237,230,214,0.9); }
+    .check { color: var(--taupe); font-size: 15px; }
+    .price-pro .check { color: rgba(237,230,214,0.7); }
+
+    /* EMAIL SIGNUP */
+    .signup-section {
+      text-align: center;
+      padding: 4rem 1.5rem 5rem;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .signup-form {
+      display: flex;
+      gap: 10px;
+      max-width: 380px;
+      margin: 0 auto 0.75rem;
+    }
+    @media (max-width: 480px) { .signup-form { flex-direction: column; } }
+    .email-input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1.5px solid var(--cream);
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .email-input:focus { border-color: var(--taupe); }
+    .email-input::placeholder { color: var(--taupe); }
+    .btn-notify {
+      background: var(--brown);
+      color: var(--bg);
+      border: none;
+      border-radius: 10px;
+      padding: 12px 22px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .btn-notify:hover { opacity: 0.85; }
+    .signup-note { font-size: 12px; color: var(--taupe); }
+    .success-msg {
+      display: none;
+      color: var(--brown);
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--cream);
+      padding: 2rem;
+      text-align: center;
+    }
+    .footer-wordmark {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      margin-bottom: 0.5rem;
+    }
+    .footer-wordmark .natural { color: var(--brown); }
+    .footer-wordmark .only { color: var(--taupe); }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 1rem;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: var(--taupe);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--brown); }
+    .footer-copy { font-size: 12px; color: var(--taupe); opacity: 0.7; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero > * {
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero > *:nth-child(1) { animation-delay: 0.05s; }
+    .hero > *:nth-child(2) { animation-delay: 0.12s; }
+    .hero > *:nth-child(3) { animation-delay: 0.2s; }
+    .hero > *:nth-child(4) { animation-delay: 0.28s; }
+    .hero > *:nth-child(5) { animation-delay: 0.36s; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-wordmark">
+      <span class="natural">natural</span> <span class="only">only</span>
+    </div>
+    <a href="#notify" class="nav-cta">Get early access</a>
+  </nav>
+
+  <div class="hero">
+    <span class="hero-eyebrow">Coming soon to iOS &amp; Android</span>
+    <h1 class="hero-wordmark">
+      <span class="natural">natural</span>
+      <span class="only">only</span>
+    </h1>
+    <p class="hero-tagline">The search engine for 100% natural fiber clothing. No synthetics. No blends. Ever.</p>
+    <div class="fibers">
+      <span class="fiber">Cotton</span>
+      <span class="fiber">Linen</span>
+      <span class="fiber">Wool</span>
+      <span class="fiber">Cashmere</span>
+      <span class="fiber">Hemp</span>
+      <span class="fiber">Silk</span>
+    </div>
+    <div class="hero-actions">
+      <a href="#notify" class="btn-primary">Get early access</a>
+      <span class="hero-sub">Free to download · Premium from $4.99/mo</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <section>
+    <p class="section-label">How it works</p>
+    <h2 class="section-title">Search. Discover. Shop.</h2>
+    <p class="section-sub">Finding 100% natural clothing has always been frustratingly hard. We fixed that.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Search anything</div>
+        <div class="step-text">Type what you're looking for — "linen shirt" or "wool sweater men"</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Only natural results</div>
+        <div class="step-text">Our AI filters every synthetic blend automatically before you see a single result</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Shop with confidence</div>
+        <div class="step-text">Tap through to buy directly from the brand, knowing it's 100% natural</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="filter-section">
+    <div class="filter-inner">
+      <p class="section-label">Our promise</p>
+      <h2 class="section-title">Zero tolerance for synthetics</h2>
+      <p class="section-sub">If a product contains any of these, it will never appear in your results.</p>
+      <div class="no-list">
+        <span class="no-tag strikethrough">Polyester</span>
+        <span class="no-tag strikethrough">Nylon</span>
+        <span class="no-tag strikethrough">Spandex</span>
+        <span class="no-tag strikethrough">Rayon</span>
+        <span class="no-tag strikethrough">Acrylic</span>
+        <span class="no-tag strikethrough">Viscose</span>
+        <span class="no-tag strikethrough">Elastane</span>
+        <span class="no-tag strikethrough">Modal</span>
+      </div>
+      <p class="section-label" style="color:rgba(237,230,214,0.5); margin-bottom: 0.75rem;">What you will find</p>
+      <div class="yes-list">
+        <span class="yes-tag">100% organic cotton</span>
+        <span class="yes-tag">Pure linen</span>
+        <span class="yes-tag">Merino wool</span>
+        <span class="yes-tag">Cashmere</span>
+        <span class="yes-tag">Hemp</span>
+        <span class="yes-tag">Silk</span>
+        <span class="yes-tag">Alpaca</span>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <p class="section-label">Pricing</p>
+    <h2 class="section-title">Free to start</h2>
+    <p class="section-sub">Try it free. Upgrade when you're ready for unlimited access.</p>
+    <div class="pricing-grid">
+      <div class="price-card price-free">
+        <div class="price-tier">Free</div>
+        <div class="price-amount">$0</div>
+        <div class="price-alt">Always free</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> 3 searches per day</li>
+          <li><span class="check">✓</span> Browse natural results</li>
+          <li><span class="check">✓</span> Fiber filter</li>
+        </ul>
+      </div>
+      <div class="price-card price-pro">
+        <div class="price-tier">Premium</div>
+        <div class="price-amount">$4.99<span class="price-period">/mo</span></div>
+        <div class="price-alt">or $29.99/yr <span class="save-badge">Save 50%</span></div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Unlimited search</li>
+          <li><span class="check">✓</span> Save items</li>
+          <li><span class="check">✓</span> Direct shop links</li>
+          <li><span class="check">✓</span> All fibers &amp; brands</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <div class="signup-section" id="notify">
+    <p class="section-label">Early access</p>
+    <h2 class="section-title">Be first in line</h2>
+    <p class="section-sub" style="margin-bottom: 2rem;">We're launching soon on iOS and Android. Join the list and we'll notify you the day it's live.</p>
+    <div class="signup-form">
+      <input class="email-input" type="email" placeholder="your@email.com" id="emailInput" />
+      <button class="btn-notify" onclick="handleSignup()">Notify me</button>
+    </div>
+    <p class="signup-note">No spam. Just one email when we launch.</p>
+    <p class="success-msg" id="successMsg">You're on the list! We'll be in touch.</p>
+  </div>
+
+  <footer>
+    <div class="footer-wordmark">
+      <span class="natural">natural</span> <span class="only">only</span>
+    </div>
+    <div class="footer-links">
+      <a href="mailto:hello@naturalonly.app">Contact</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
+    </div>
+    <p class="footer-copy">© 2025 Natural Only · naturalonly.app</p>
+  </footer>
+
+  <script>
+    function handleSignup() {
+      const input = document.getElementById('emailInput');
+      const msg = document.getElementById('successMsg');
+      const email = input.value.trim();
+      if (!email || !email.includes('@')) {
+        input.style.borderColor = '#c0392b';
+        setTimeout(() => input.style.borderColor = '', 1500);
+        return;
+      }
+      input.style.display = 'none';
+      document.querySelector('.btn-notify').style.display = 'none';
+      msg.style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>
