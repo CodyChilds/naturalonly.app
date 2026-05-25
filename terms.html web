@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — Natural Only</title>
+  <meta name="description" content="Natural Only Terms of Service" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F7F4EF;
+      --cream: #EDE6D6;
+      --brown: #6B3F2A;
+      --taupe: #A89880;
+      --text: #4a3728;
+      --light: #8a7a6a;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+    nav {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .wordmark { font-family: 'DM Serif Display', serif; font-size: 22px; text-decoration: none; }
+    .wordmark .natural { color: var(--brown); }
+    .wordmark .only { color: var(--taupe); }
+    nav a.back { font-size: 14px; color: var(--taupe); text-decoration: none; }
+    nav a.back:hover { color: var(--brown); }
+    .container { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .page-label { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--taupe); margin-bottom: 0.75rem; }
+    h1 { font-family: 'DM Serif Display', serif; font-size: clamp(32px, 5vw, 48px); color: var(--brown); margin-bottom: 0.5rem; letter-spacing: -1px; }
+    .updated { font-size: 13px; color: var(--light); margin-bottom: 2rem; }
+    .intro { background: var(--cream); border-radius: 12px; padding: 1.25rem 1.5rem; font-size: 15px; color: var(--text); line-height: 1.65; margin-bottom: 2.5rem; }
+    h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--brown); margin: 2rem 0 0.75rem; }
+    p { margin-bottom: 1rem; font-size: 15px; color: var(--text); }
+    footer { background: var(--cream); padding: 1.5rem 2rem; text-align: center; }
+    .footer-wordmark { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 0.5rem; }
+    .footer-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 0.75rem; }
+    .footer-links a { font-size: 13px; color: var(--taupe); text-decoration: none; }
+    .footer-links a:hover { color: var(--brown); }
+    .footer-copy { font-size: 12px; color: var(--taupe); opacity: 0.7; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="wordmark"><span class="natural">natural</span> <span class="only">only</span></a>
+    <a href="/" class="back">← Back</a>
+  </nav>
+
+  <div class="container">
+    <p class="page-label">Legal</p>
+    <h1>Terms of Service</h1>
+    <p class="updated">Last updated: May 19, 2026</p>
+
+    <div class="intro">
+      Welcome to Natural Only. By downloading or using our app, you agree to these Terms of Service. Please read them carefully.
+    </div>
+
+    <h2>1. About Natural Only</h2>
+    <p>Natural Only ("we," "us," or "our") is a mobile application that provides a curated search engine for 100% natural fiber clothing products. We connect users with third-party retailers and brands selling natural fiber clothing, including cotton, linen, wool, cashmere, hemp, and silk.</p>
+
+    <h2>2. Acceptance of Terms</h2>
+    <p>By accessing or using Natural Only, you confirm that you are at least 13 years of age, that you have read and understood these Terms, and that you agree to be bound by them. If you do not agree, please do not use the app.</p>
+
+    <h2>3. Account Registration</h2>
+    <p>You may use certain features of Natural Only as a guest. To access premium features, you must create an account. You agree to provide accurate information, keep your account credentials secure, and notify us immediately of any unauthorized access. You are responsible for all activity under your account.</p>
+
+    <h2>4. Subscription and Payments</h2>
+    <p>Natural Only offers a free tier and a premium subscription. The free tier is limited to 3 searches per day with no ability to save items or access shop links. The premium subscription offers unlimited searches, saved items, and shop links, available at $4.99/month or $29.99/year.</p>
+    <p>Subscriptions are billed through the Apple App Store or Google Play Store. Payment is charged to your account at confirmation of purchase. Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. You can manage or cancel your subscription in your App Store or Google Play account settings. We do not offer refunds except as required by applicable law or App Store/Google Play policies.</p>
+
+    <h2>5. Affiliate Relationships</h2>
+    <p>Natural Only participates in affiliate marketing programs. When you tap "Shop Now" on a product and make a purchase, we may earn a commission from the retailer at no additional cost to you. This does not influence which products appear in search results — our AI filter applies equally to all products regardless of affiliate relationship. We only display products that meet our 100% natural fiber standard.</p>
+
+    <h2>6. Product Information and Accuracy</h2>
+    <p>We use automated systems and human review to verify that products listed in Natural Only are made from 100% natural fibers. However, we cannot guarantee the accuracy of product descriptions provided by third-party retailers. Product availability, pricing, and fiber content may change without notice. Always verify fiber content on the retailer's website before purchase. Natural Only is not responsible for inaccurate product information provided by third parties.</p>
+
+    <h2>7. Prohibited Uses</h2>
+    <p>You agree not to use the app for any unlawful purpose, attempt to reverse engineer or scrape our product database, misrepresent your identity or affiliation, interfere with or disrupt the app or its servers, use automated tools to access the app without our written permission, or resell or commercially exploit any content from the app.</p>
+
+    <h2>8. Intellectual Property</h2>
+    <p>All content in Natural Only, including the wordmark, design, search technology, and curated product database, is owned by or licensed to Natural Only. You may not reproduce, distribute, or create derivative works without our express written permission. User-generated content (such as saved lists) remains yours; by using the app you grant us a limited license to store and display it for your use.</p>
+
+    <h2>9. Third-Party Links and Services</h2>
+    <p>Natural Only links to third-party retailer websites. We are not responsible for the content, privacy practices, or terms of those websites. Purchases made on third-party sites are subject to those retailers' terms and policies. We are not a party to any transaction between you and a retailer.</p>
+
+    <h2>10. Disclaimer of Warranties</h2>
+    <p>Natural Only is provided "as is" and "as available" without warranties of any kind. We do not warrant that the app will be uninterrupted, error-free, or that product information will always be accurate. Your use of the app is at your own risk.</p>
+
+    <h2>11. Limitation of Liability</h2>
+    <p>To the fullest extent permitted by law, Natural Only shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the app. Our total liability to you for any claim shall not exceed the amount you paid us in the 12 months preceding the claim.</p>
+
+    <h2>12. Indemnification</h2>
+    <p>You agree to indemnify and hold harmless Natural Only, its officers, directors, employees, and agents from any claims, damages, or expenses arising from your use of the app, your violation of these Terms, or your violation of any rights of a third party.</p>
+
+    <h2>13. Changes to Terms</h2>
+    <p>We may update these Terms from time to time. We will notify you of material changes through the app or by email. Your continued use of Natural Only after changes take effect constitutes acceptance of the new Terms.</p>
+
+    <h2>14. Governing Law</h2>
+    <p>These Terms are governed by the laws of the State of Texas, United States, without regard to conflict of law principles. Any disputes shall be resolved in the courts of Texas.</p>
+
+    <h2>15. Contact Us</h2>
+    <p>If you have questions about these Terms, please contact us:</p>
+    <p>Email: support@naturalonly.app<br>Website: https://naturalonly.app</p>
+  </div>
+
+  <footer>
+    <div class="footer-wordmark">
+      <span style="color:#6B3F2A">natural</span> <span style="color:#A89880">only</span>
+    </div>
+    <div class="footer-links">
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
+      <a href="mailto:support@naturalonly.app">Contact</a>
+    </div>
+    <p class="footer-copy">© 2026 Natural Only. All rights reserved.</p>
+  </footer>
+</body>
+</html>
