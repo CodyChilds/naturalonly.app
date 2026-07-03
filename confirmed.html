@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Confirmed — Natural Only</title>
+  <meta name="description" content="Your Natural Only email is confirmed." />
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F7F4EF;
+      --cream: #EDE6D6;
+      --brown: #6B3F2A;
+      --taupe: #A89880;
+      --text: #4a3728;
+      --light: #8a7a6a;
+    }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      display: flex;
+      flex-direction: column;
+    }
+    nav {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wordmark { font-family: 'DM Serif Display', serif; font-size: 22px; text-decoration: none; }
+    .wordmark .natural { color: var(--brown); }
+    .wordmark .only { color: var(--taupe); }
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+    }
+    .card {
+      max-width: 420px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(107, 63, 42, 0.06);
+    }
+    .check {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--cream);
+      color: var(--brown);
+      font-size: 28px;
+      line-height: 56px;
+      margin: 0 auto 1.25rem;
+    }
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      color: var(--brown);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.5px;
+    }
+    p { font-size: 15px; color: var(--text); margin-bottom: 0.5rem; }
+    .hint { font-size: 13px; color: var(--light); margin-top: 1.25rem; }
+    footer { background: var(--cream); padding: 1.25rem 2rem; text-align: center; }
+    .footer-copy { font-size: 12px; color: var(--taupe); }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="wordmark"><span class="natural">natural</span> <span class="only">only</span></a>
+  </nav>
+
+  <main>
+    <div class="card">
+      <div class="check">✓</div>
+      <h1>Email confirmed</h1>
+      <p>You're all set. Return to the <strong>Natural Only</strong> app and sign in to start searching 100% natural-fiber clothing.</p>
+      <p class="hint">You can close this page.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-copy">© 2026 Natural Only · naturalonly.app</div>
+  </footer>
+</body>
+</html>
