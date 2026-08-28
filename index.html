@@ -148,7 +148,7 @@
       margin: 0 auto;
     }
 
-    /* HOW IT WORKS */
+    /* SECTIONS */
     section { padding: 4rem 1.5rem; max-width: 680px; margin: 0 auto; }
     .section-label {
       font-size: 12px;
@@ -239,6 +239,31 @@
       font-weight: 500;
     }
 
+    /* BRANDS */
+    .brand-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+    .brand-chip {
+      background: white;
+      border: 1px solid var(--cream);
+      color: var(--brown);
+      border-radius: 12px;
+      padding: 12px 22px;
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px;
+      letter-spacing: -0.2px;
+    }
+    .brand-more {
+      width: 100%;
+      text-align: center;
+      font-size: 13px;
+      color: var(--light-text);
+      margin-top: 1rem;
+    }
+
     /* PRICING */
     .pricing-grid {
       display: grid;
@@ -302,6 +327,27 @@
     .price-pro .price-features li { color: rgba(237,230,214,0.9); }
     .check { color: var(--taupe); font-size: 15px; }
     .price-pro .check { color: rgba(237,230,214,0.7); }
+
+    /* PARTNERS */
+    .partners-card {
+      background: var(--cream);
+      border-radius: 16px;
+      padding: 2rem 1.75rem;
+      text-align: center;
+    }
+    .partners-card p {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto 1.25rem;
+    }
+    .partners-card a.partner-mail {
+      color: var(--brown);
+      font-weight: 500;
+      text-decoration: none;
+      border-bottom: 1px solid var(--taupe);
+    }
 
     /* EMAIL SIGNUP */
     .signup-section {
@@ -372,6 +418,7 @@
       justify-content: center;
       gap: 24px;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
     .footer-links a {
       font-size: 13px;
@@ -407,7 +454,7 @@
   </nav>
 
   <div class="hero">
-    <span class="hero-eyebrow">Coming soon to iOS</span>
+    <span class="hero-eyebrow">In App Store review — launching soon</span>
     <h1 class="hero-wordmark">
       <span class="natural">natural</span>
       <span class="only">only</span>
@@ -442,13 +489,13 @@
       </div>
       <div class="step">
         <div class="step-num">2</div>
-        <div class="step-title">Only natural results</div>
-        <div class="step-text">Our AI filters every synthetic blend automatically before you see a single result</div>
+        <div class="step-title">Verified natural</div>
+        <div class="step-text">Every product is individually reviewed to confirm 100% natural fiber content before it goes live</div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <div class="step-title">Shop with confidence</div>
-        <div class="step-text">Tap through to buy directly from the brand, knowing it's 100% natural</div>
+        <div class="step-title">Shop direct from brands</div>
+        <div class="step-text">Tap Shop Now and buy on the brand's own site. We never sit between you and the maker</div>
       </div>
     </div>
   </section>
@@ -457,7 +504,7 @@
     <div class="filter-inner">
       <p class="section-label">Our promise</p>
       <h2 class="section-title">Zero tolerance for synthetics</h2>
-      <p class="section-sub">If a product contains any of these, it will never appear in your results.</p>
+      <p class="section-sub">If a product contains any of these, it will never appear in your results. When a brand doesn't state fiber content clearly, we check their materials pages — and when we can't verify it, it doesn't go in.</p>
       <div class="no-list">
         <span class="no-tag strikethrough">Polyester</span>
         <span class="no-tag strikethrough">Nylon</span>
@@ -480,6 +527,23 @@
       </div>
     </div>
   </div>
+
+  <section>
+    <p class="section-label">In the catalog</p>
+    <h2 class="section-title">Brands we feature</h2>
+    <p class="section-sub">A curated, growing catalog of makers who share the standard — from everyday basics to heirloom pieces, across a wide range of prices.</p>
+    <div class="brand-grid">
+      <span class="brand-chip">Cottonique</span>
+      <span class="brand-chip">Burt's Bees Baby</span>
+      <span class="brand-chip">Harvest &amp; Mill</span>
+      <span class="brand-chip">Outerknown</span>
+      <span class="brand-chip">Colored Organics</span>
+      <span class="brand-chip">Linen Tales</span>
+      <p class="brand-more">…and 25+ more, with new brands verified regularly.</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
 
   <section>
     <p class="section-label">Pricing</p>
@@ -510,6 +574,15 @@
     </div>
   </section>
 
+  <section>
+    <p class="section-label">For brands &amp; partners</p>
+    <h2 class="section-title">Purchase-intent traffic, full price</h2>
+    <div class="partners-card">
+      <p>naturalonly sends brands qualified shoppers: every visitor already searched for, saw, and chose your specific product before tapping through. Links open your own site — we take no checkout, hold no inventory, and run no coupons or cashback.</p>
+      <p>Brand or affiliate manager? We'd love to hear from you: <a class="partner-mail" href="mailto:partnerships@naturalonly.app">partnerships@naturalonly.app</a></p>
+    </div>
+  </section>
+
   <div class="divider"></div>
 
   <div class="signup-section" id="notify">
@@ -530,6 +603,7 @@
     </div>
     <div class="footer-links">
       <a href="mailto:hello@naturalonly.app">Contact</a>
+      <a href="mailto:partnerships@naturalonly.app">Partnerships</a>
       <a href="/privacy">Privacy Policy</a>
       <a href="/terms">Terms of Service</a>
     </div>
@@ -537,18 +611,33 @@
   </footer>
 
   <script>
+    var SUPABASE_URL = 'https://nmrjhcmqsmasquktihvd.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tcmpoY21xc21hc3F1a3RpaHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTU2NTIsImV4cCI6MjA5NDE5MTY1Mn0.QuYQYHP-xNgBCHxLkyppP4Uv4gtF27_aeWnFhb_TYdA';
+
+    function showSuccess() {
+      document.getElementById('emailInput').style.display = 'none';
+      document.querySelector('.btn-notify').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+    }
+
     function handleSignup() {
-      const input = document.getElementById('emailInput');
-      const msg = document.getElementById('successMsg');
-      const email = input.value.trim();
+      var input = document.getElementById('emailInput');
+      var email = input.value.trim();
       if (!email || !email.includes('@')) {
         input.style.borderColor = '#c0392b';
-        setTimeout(() => input.style.borderColor = '', 1500);
+        setTimeout(function () { input.style.borderColor = ''; }, 1500);
         return;
       }
-      input.style.display = 'none';
-      document.querySelector('.btn-notify').style.display = 'none';
-      msg.style.display = 'block';
+      if (SUPABASE_ANON_KEY.indexOf('PASTE_YOUR') === 0) { showSuccess(); return; }
+      fetch(SUPABASE_URL + '/rest/v1/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ email: email })
+      }).then(showSuccess).catch(showSuccess);
     }
   </script>
 
