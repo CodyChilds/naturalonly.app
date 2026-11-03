@@ -7,9 +7,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>naturalonly — 100% Natural Fiber Clothing Search</title>
-  <meta name="description" content="The search engine for 100% natural fiber clothing. Cotton, linen, wool, cashmere, hemp, silk, alpaca. No synthetics. Ever." />
+  <meta name="description" content="The search engine for 100% natural fiber clothing. Cotton, linen, wool, cashmere, hemp, silk, alpaca. No polyester, no nylon, no acrylic." />
   <meta property="og:title" content="naturalonly" />
-  <meta property="og:description" content="Search thousands of 100% natural fiber products. No blends. No synthetics. Ever." />
+  <meta property="og:description" content="Search thousands of 100% natural fiber products. No polyester, no nylon, no acrylic." />
   <meta property="og:url" content="https://naturalonly.app" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -225,6 +225,27 @@
       font-size: 13px;
     }
     .no-tag.strikethrough { text-decoration: line-through; opacity: 0.5; }
+    .elastane-note {
+      font-size: 13px;
+      color: rgba(237,230,214,0.75);
+      max-width: 420px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+
+    /* BROWSE */
+    .browse-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .browse-link {
+      background: white;
+      border: 1px solid var(--cream);
+      color: var(--brown);
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: 14px;
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+    .browse-link:hover { border-color: var(--taupe); }
     .yes-list {
       display: flex;
       flex-wrap: wrap;
@@ -469,7 +490,7 @@
       <span class="natural">natural</span>
       <span class="only">only</span>
     </h1>
-    <p class="hero-tagline">The search engine for 100% natural fiber clothing. No synthetics. No blends. Ever.</p>
+    <p class="hero-tagline">100% natural fibers. No polyester, no nylon, no acrylic.</p>
     <div class="fibers">
       <span class="fiber">Cotton</span>
       <span class="fiber">Linen</span>
@@ -518,13 +539,12 @@
       <div class="no-list">
         <span class="no-tag strikethrough">Polyester</span>
         <span class="no-tag strikethrough">Nylon</span>
-        <span class="no-tag strikethrough">Spandex</span>
         <span class="no-tag strikethrough">Rayon</span>
         <span class="no-tag strikethrough">Acrylic</span>
         <span class="no-tag strikethrough">Viscose</span>
-        <span class="no-tag strikethrough">Elastane</span>
         <span class="no-tag strikethrough">Modal</span>
       </div>
+      <p class="elastane-note">A small amount of elastane (up to 10%) is allowed for stretch. The 100% pages on this site list single-fiber pieces only.</p>
       <p class="section-label" style="color:rgba(237,230,214,0.5); margin-bottom: 0.75rem;">What you will find</p>
       <div class="yes-list">
         <span class="yes-tag">100% organic cotton</span>
@@ -537,6 +557,39 @@
       </div>
     </div>
   </div>
+
+  <section>
+    <p class="section-label">Browse by fiber</p>
+    <h2 class="section-title">100% one fiber, nothing else</h2>
+    <p class="section-sub">Every piece on these pages is a single natural fiber by the brand's own fabric listing. Updated nightly.</p>
+    <div class="browse-grid">
+      <a class="browse-link" href="/100-percent-cotton-t-shirts/">100% cotton t-shirts</a>
+      <a class="browse-link" href="/100-percent-linen-pants/">100% linen pants</a>
+      <a class="browse-link" href="/100-percent-cotton-underwear/">100% cotton underwear</a>
+      <a class="browse-link" href="/100-percent-cotton-jeans/">100% cotton jeans</a>
+      <a class="browse-link" href="/100-percent-cashmere-sweaters/">100% cashmere sweaters</a>
+      <a class="browse-link" href="/100-percent-wool-socks/">100% wool socks</a>
+      <a class="browse-link" href="/100-percent-cotton-pajamas/">100% cotton pajamas</a>
+      <a class="browse-link" href="/100-percent-cotton-leggings/">100% cotton leggings</a>
+      <a class="browse-link" href="/100-percent-linen-shirts/">100% linen shirts</a>
+      <a class="browse-link" href="/100-percent-cotton-sweatpants/">100% cotton sweatpants</a>
+      <a class="browse-link" href="/100-percent-linen-dresses/">100% linen dresses</a>
+      <a class="browse-link" href="/100-percent-cotton-hoodies/">100% cotton hoodies</a>
+      <a class="browse-link" href="/100-percent-silk-pajamas/">100% silk pajamas</a>
+      <a class="browse-link" href="/100-percent-hemp-t-shirts/">100% hemp t-shirts</a>
+      <a class="browse-link" href="/100-percent-cotton-dresses/">100% cotton dresses</a>
+    </div>
+    <p class="section-label" style="margin-top:2.5rem; margin-bottom:1rem;">By brand</p>
+    <div class="browse-grid">
+      <a class="browse-link" href="/brands/old-navy/">Old Navy</a>
+      <a class="browse-link" href="/brands/gap/">Gap</a>
+      <a class="browse-link" href="/brands/quince/">Quince</a>
+      <a class="browse-link" href="/brands/everlane/">Everlane</a>
+      <a class="browse-link" href="/brands/pact/">Pact</a>
+    </div>
+  </section>
+
+  <div class="divider"></div>
 
   <section>
     <p class="section-label">In the catalog</p>
