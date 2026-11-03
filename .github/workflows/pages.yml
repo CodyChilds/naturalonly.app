@@ -1,0 +1,86 @@
+# Build the generated pages (scripts/build-site.mjs) and deploy the whole site
+# to GitHub Pages. Nightly at 04:00 Central, after the 02:00 pipeline; or by hand
+# from the Actions tab (Run workflow).
+#
+# GitHub cron is UTC and has no time zones, so both offsets are scheduled and
+# the clock step keeps the one that is 04:00 in Chicago today: 09:00 UTC in
+# daylight time (CDT, -0500), 10:00 UTC in standard time (CST, -0600). It reads
+# which cron fired, not the wall clock, so a late-starting run still counts.
+#
+# Repo setting this needs once: Settings → Pages → Build and deployment →
+# Source: GitHub Actions.
+
+name: Build and deploy site
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.clock.outputs.run }}
+    steps:
+      - id: clock
+        name: Is it 04:00 in Chicago?
+        run: |
+          offset=$(TZ=America/Chicago date +%z)
+          case "${{ github.event_name }}|${{ github.event.schedule }}|$offset" in
+            workflow_dispatch*)            run=true ;;
+            "schedule|0 9 * * *|-0500")    run=true ;;
+            "schedule|0 10 * * *|-0600")   run=true ;;
+            *)                             run=false ;;
+          esac
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "event=${{ github.event_name }} schedule='${{ github.event.schedule }}' offset=$offset -> run=$run"
+
+      - if: steps.clock.outputs.run == 'true'
+        uses: actions/checkout@v4
+
+      - if: steps.clock.outputs.run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - if: steps.clock.outputs.run == 'true'
+        name: Test
+        run: node scripts/build-site.test.mjs
+
+      - if: steps.clock.outputs.run == 'true'
+        name: Build
+        env:
+          # The publishable (anon) key the app ships: public by design, reads
+          # only what RLS lets anyone read.
+          SUPABASE_ANON_KEY: sb_publishable_7Ur6awC1cF4GnN4oBl3MAQ_ZDhPsQsE
+        run: node scripts/build-site.mjs
+
+      - if: steps.clock.outputs.run == 'true'
+        uses: actions/configure-pages@v5
+
+      - if: steps.clock.outputs.run == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
