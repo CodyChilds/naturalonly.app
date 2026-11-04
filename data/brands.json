@@ -78,5 +78,133 @@
   "Hill House": {
     "blurb": "A New York brand best known for the Nap Dress, making dresses and separates in cotton poplin, linen and knits.",
     "catalog_note": "Only the single-fiber pieces are listed; a few styles use blends."
+  },
+  "Alicia Adams Alpaca": {
+    "blurb": "A New York label making wraps, sweaters and throws from baby alpaca.",
+    "catalog_note": "Nearly everything is 100% alpaca."
+  },
+  "All Cotton and Linen": {
+    "blurb": "A small brand selling cotton and linen clothing and home textiles, named for exactly what it sells.",
+    "catalog_note": "The range is 100% cotton or 100% linen throughout."
+  },
+  "Allbirds": {
+    "blurb": "The San Francisco footwear brand known for merino wool runners and loungers.",
+    "catalog_note": "Only the all-wool pieces are listed; Allbirds' tree and sugarcane materials don't qualify."
+  },
+  "Allwear": {
+    "blurb": "A basics brand making underwear, tees and loungewear in organic cotton.",
+    "catalog_note": "Nearly everything is 100% organic cotton."
+  },
+  "Burt's Bees Baby": {
+    "blurb": "The baby and kids' line from the Burt's Bees family, known for GOTS-certified organic cotton pajamas, bodysuits and bedding.",
+    "catalog_note": "The clothing is 100% organic cotton throughout."
+  },
+  "Cottonique": {
+    "blurb": "A brand built for people with skin sensitivities, making underwear, socks and basics from 100% cotton with no latex or spandex.",
+    "catalog_note": "The entire range is 100% cotton by design."
+  },
+  "Coyuchi": {
+    "blurb": "A California organic-cotton brand, best known for bedding, with loungewear and robes.",
+    "catalog_note": "Most pieces are 100% organic cotton; a few add linen."
+  },
+  "Elle & Riley": {
+    "blurb": "A cashmere label making sweaters, wraps and loungewear from Mongolian cashmere.",
+    "catalog_note": "The range is 100% cashmere throughout."
+  },
+  "Fair Indigo": {
+    "blurb": "A Wisconsin brand making Fair Trade organic Pima cotton basics — tees, dresses and loungewear.",
+    "catalog_note": "Nearly everything is 100% organic Pima cotton; a few pieces add elastane and are left out."
+  },
+  "Filson": {
+    "blurb": "The Seattle outfitter founded in 1897, known for waxed cotton jackets, wool coats and heavy flannel shirts.",
+    "catalog_note": "Filson also makes nylon and blended pieces; only the all-natural ones are listed here."
+  },
+  "Harvest & Mill": {
+    "blurb": "A California brand making tees and basics from organic cotton grown and sewn in the USA, much of it undyed.",
+    "catalog_note": "The range is 100% organic cotton throughout."
+  },
+  "Ibex": {
+    "blurb": "A merino wool outdoor brand making base layers, tees and jackets.",
+    "catalog_note": "Many Ibex pieces blend merino with nylon; only the all-wool items are listed."
+  },
+  "Industry of All Nations": {
+    "blurb": "A Los Angeles brand making clothing with traditional methods and natural dyes — Peruvian cotton tees, alpaca knits, undyed basics.",
+    "catalog_note": "Nearly everything is a single natural fiber."
+  },
+  "KENT": {
+    "blurb": "A brand making compostable organic cotton underwear with no synthetic elastic.",
+    "catalog_note": "The range is 100% organic cotton by design."
+  },
+  "Kowtow": {
+    "blurb": "A New Zealand brand making Fair Trade organic cotton clothing — tees, dresses, knits — with a stated circular-design focus.",
+    "catalog_note": "Nearly everything is 100% organic cotton."
+  },
+  "Lake Pajamas": {
+    "blurb": "A Savannah, Georgia brand known for Pima cotton pajamas in signature stripes and prints, for the whole family.",
+    "catalog_note": "The range is 100% Pima cotton throughout."
+  },
+  "Lezat": {
+    "blurb": "A small loungewear brand making leggings, tees and sets in organic cotton.",
+    "catalog_note": "Only the 100% cotton pieces are listed."
+  },
+  "Linen Tales": {
+    "blurb": "A Lithuanian brand making clothing and home textiles from European linen.",
+    "catalog_note": "Clothing is 100% linen throughout."
+  },
+  "Marle": {
+    "blurb": "A New Zealand womenswear brand making organic cotton, linen and wool pieces in muted colours.",
+    "catalog_note": "Only the single-fiber pieces are listed."
+  },
+  "MATE the Label": {
+    "blurb": "A Los Angeles brand making organic cotton essentials — tees, sweats, dresses — dyed with low-impact dyes.",
+    "catalog_note": "Most of the range is 100% organic cotton; pieces with elastane are left out."
+  },
+  "Mightly": {
+    "blurb": "A kids' brand making Fair Trade organic cotton clothing in bright colours.",
+    "catalog_note": "Nearly everything is 100% organic cotton."
+  },
+  "Misha & Puff": {
+    "blurb": "A New England children's brand known for hand-knit sweaters and organic cotton basics with a heritage look.",
+    "catalog_note": "Most pieces are 100% cotton or 100% wool."
+  },
+  "Outerknown": {
+    "blurb": "A California brand co-founded by surfer Kelly Slater, making organic cotton tees, shirts and sweats.",
+    "catalog_note": "Outerknown also uses recycled synthetics; only the all-natural pieces are listed."
+  },
+  "PAKA": {
+    "blurb": "A brand making sweaters, socks and base layers from Peruvian alpaca.",
+    "catalog_note": "Only the single-fiber alpaca and wool pieces are listed."
+  },
+  "Rawganique": {
+    "blurb": "A brand making clothing and footwear from organic cotton, hemp and linen, sewn in its own workshop with no synthetic components.",
+    "catalog_note": "Nearly everything is a single natural fiber."
+  },
+  "Ridge Merino": {
+    "blurb": "A Northern California merino wool brand making base layers and tees.",
+    "catalog_note": "Only the all-wool items are listed; blends are left out."
+  },
+  "Ryker": {
+    "blurb": "A small menswear brand making wool and cotton basics.",
+    "catalog_note": "Only the single-fiber pieces are listed."
+  },
+  "Subset": {
+    "blurb": "An organic cotton underwear and basics brand, formerly Knickey.",
+    "catalog_note": "Nearly everything is 100% organic cotton; pieces with elastane are left out."
+  },
+  "Unbound Merino": {
+    "blurb": "A travel-clothing brand making merino wool tees, socks and layers meant to be worn for days without washing.",
+    "catalog_note": "The range is 100% merino throughout."
+  },
+  "Wolk": {
+    "blurb": "An Antwerp brand making merino wool sleepwear and base layers.",
+    "catalog_note": "The range is 100% merino throughout."
+  },
+  "Wool&Prince": {
+    "blurb": "A menswear brand known for merino wool button-down shirts and tees.",
+    "catalog_note": "Only the all-wool pieces are listed; blends are left out."
+  },
+  "WoolX": {
+    "blurb": "A New York merino wool brand making base layers, tees and socks.",
+    "catalog_note": "Only the all-wool items are listed; blends are left out."
   }
 }
