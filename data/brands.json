@@ -97,11 +97,11 @@
   },
   "Burt's Bees Baby": {
     "blurb": "The baby and kids' line from the Burt's Bees family, known for GOTS-certified organic cotton pajamas, bodysuits and bedding.",
-    "catalog_note": "The clothing is 100% organic cotton throughout."
+    "catalog_note": "The pieces listed are 100% cotton. Pieces with elastane or incomplete fabric listings are left out."
   },
   "Cottonique": {
     "blurb": "A brand built for people with skin sensitivities, making underwear, socks and basics from 100% cotton with no latex or spandex.",
-    "catalog_note": "The entire range is 100% cotton by design."
+    "catalog_note": "The pieces listed are 100% cotton. Pieces with incomplete fabric listings are left out."
   },
   "Coyuchi": {
     "blurb": "A California organic-cotton brand, best known for bedding, with loungewear and robes.",
@@ -149,11 +149,11 @@
   },
   "Linen Tales": {
     "blurb": "A Lithuanian brand making clothing and home textiles from European linen.",
-    "catalog_note": "Clothing is 100% linen throughout."
+    "catalog_note": "Most pieces are 100% linen; a few are natural blends. Pieces with elastane or incomplete fabric listings are left out."
   },
   "Marle": {
     "blurb": "A New Zealand womenswear brand making organic cotton, linen and wool pieces in muted colours.",
-    "catalog_note": "Only the single-fiber pieces are listed."
+    "catalog_note": "Mostly 100% cotton; a few pieces are natural-fiber blends."
   },
   "MATE the Label": {
     "blurb": "A Los Angeles brand making organic cotton essentials — tees, sweats, dresses — dyed with low-impact dyes.",
@@ -173,19 +173,19 @@
   },
   "PAKA": {
     "blurb": "A brand making sweaters, socks and base layers from Peruvian alpaca.",
-    "catalog_note": "Only the single-fiber alpaca and wool pieces are listed."
+    "catalog_note": "Mostly alpaca, with some cotton and a few natural-fiber blends."
   },
   "Rawganique": {
     "blurb": "A brand making clothing and footwear from organic cotton, hemp and linen, sewn in its own workshop with no synthetic components.",
-    "catalog_note": "Nearly everything is a single natural fiber."
+    "catalog_note": "Cotton, hemp, wool and linen pieces, plus a few natural blends. Pieces with incomplete fabric listings are left out."
   },
   "Ridge Merino": {
     "blurb": "A Northern California merino wool brand making base layers and tees.",
-    "catalog_note": "Only the all-wool items are listed; blends are left out."
+    "catalog_note": "Mostly merino wool; pieces blended with synthetics are left out."
   },
   "Ryker": {
     "blurb": "A small menswear brand making wool and cotton basics.",
-    "catalog_note": "Only the single-fiber pieces are listed."
+    "catalog_note": "Wool and cotton pieces, plus a few natural-fiber blends."
   },
   "Subset": {
     "blurb": "An organic cotton underwear and basics brand, formerly Knickey.",
@@ -193,7 +193,7 @@
   },
   "Unbound Merino": {
     "blurb": "A travel-clothing brand making merino wool tees, socks and layers meant to be worn for days without washing.",
-    "catalog_note": "The range is 100% merino throughout."
+    "catalog_note": "Mostly 100% merino. Pieces with synthetics or incomplete fabric listings are left out."
   },
   "Wolk": {
     "blurb": "An Antwerp brand making merino wool sleepwear and base layers.",
@@ -201,7 +201,7 @@
   },
   "Wool&Prince": {
     "blurb": "A menswear brand known for merino wool button-down shirts and tees.",
-    "catalog_note": "Only the all-wool pieces are listed; blends are left out."
+    "catalog_note": "Mostly merino wool; a few pieces are linen or cotton."
   },
   "WoolX": {
     "blurb": "A New York merino wool brand making base layers, tees and socks.",
