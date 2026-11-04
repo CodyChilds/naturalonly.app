@@ -17,11 +17,11 @@
   },
   "Gap": {
     "blurb": "The American mall staple since 1969 — denim, tees, khakis and sweats for the whole family.",
-    "catalog_note": "Most of Gap's range is a blend. This page is the all-cotton part of it, so you don't have to read every label."
+    "catalog_note": "Most of Gap's range contains synthetics. This page is the all-natural part of it."
   },
   "Old Navy": {
     "blurb": "Gap Inc.'s value brand, launched in 1994, selling family basics at low prices.",
-    "catalog_note": "Most of Old Navy is a blend. These are the 100% cotton pieces."
+    "catalog_note": "Most of Old Navy contains synthetics. These are the all-natural pieces."
   },
   "Everlane": {
     "blurb": "A San Francisco brand founded in 2010 that publishes its factories and cost breakdowns; known for organic cotton tees, linen, cashmere and denim.",
@@ -29,7 +29,7 @@
   },
   "Pact": {
     "blurb": "A Boulder, Colorado brand making GOTS-certified organic cotton basics — underwear, tees, loungewear and bedding — in Fair Trade Certified factories.",
-    "catalog_note": "Almost everything Pact makes is organic cotton; a few pieces add elastane and are left out."
+    "catalog_note": "Pact's organic cotton basics; pieces that add elastane are left out."
   },
   "Jungmaven": {
     "blurb": "A hemp clothing brand making tees, sweats and basics in hemp and hemp/organic-cotton blends, sewn in the USA.",
@@ -57,7 +57,7 @@
   },
   "Magic Linen": {
     "blurb": "A Lithuanian brand sewing clothing and home textiles from European linen, sold in dozens of colourways.",
-    "catalog_note": "Clothing is 100% linen throughout."
+    "catalog_note": "Clothing is linen throughout; a few pieces blend linen with cotton."
   },
   "NAADAM": {
     "blurb": "A New York cashmere brand that buys fibre directly from herders in Mongolia and is known for its lower-priced basics.",
@@ -65,7 +65,7 @@
   },
   "Icebreaker": {
     "blurb": "A New Zealand merino wool brand making base layers, socks and outdoor clothing.",
-    "catalog_note": "Many Icebreaker pieces blend merino with nylon or Tencel. Only the all-wool items appear here."
+    "catalog_note": "Many Icebreaker pieces blend merino with nylon or Tencel; only the all-natural items appear here."
   },
   "Toad&Co": {
     "blurb": "A Santa Barbara brand making casual clothing in hemp, organic cotton and wool, with a long-standing focus on lower-impact fabrics.",
