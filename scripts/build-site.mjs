@@ -44,15 +44,23 @@ const STATIC_FILES = ['index.html', 'privacy.html', 'terms.html', 'confirmed.htm
 //   lead_created      { type: 'customer_action' }  a tap on any App Store link
 //   checkout_started  { type: 'contents' }         a tap on any affiliate product link (rel="sponsored")
 // The SDK queues the call and flushes by beacon on pagehide, so a link that
-// leaves the page still reports.
+// leaves the page still reports. It sends each call once (checked 2026-11-03 with
+// its network stubbed: a tap, and a tap whose send was cut off by the page hiding).
 export const PIXEL_ID = 'N364gzhZ9B1oiGKviY5sY7';
 export const PIXEL_HEAD = `<script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"${PIXEL_ID}",debug:false});</script>`;
 export const PIXEL_EVENTS = `<script>
+    // One tap, one event: only the primary button's click and the middle button's
+    // auxclick count (a browser that fires both for one press, or a double tap,
+    // must not send two), and each event name at most once a second.
+    var oaiqLast = {};
     ['click', 'auxclick'].forEach(function (type) {
       document.addEventListener(type, function (e) {
+        if (e.button !== (type === 'click' ? 0 : 1)) return;
         var a = e.target.closest && e.target.closest('a[href]'); if (!a || !window.oaiq) return;
-        if (a.hostname === 'apps.apple.com') oaiq('measure', 'lead_created', { type: 'customer_action' });
-        else if (a.relList.contains('sponsored')) oaiq('measure', 'checkout_started', { type: 'contents' });
+        var name = a.hostname === 'apps.apple.com' ? 'lead_created' : a.relList.contains('sponsored') ? 'checkout_started' : null;
+        if (!name || e.timeStamp - (oaiqLast[name] || -1e9) < 1000) return;
+        oaiqLast[name] = e.timeStamp;
+        oaiq('measure', name, { type: name === 'lead_created' ? 'customer_action' : 'contents' });
       }, true);
     });
   </script>`;
