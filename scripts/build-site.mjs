@@ -36,6 +36,27 @@ const MAX_CARDS = 72;          // per fiber page; brand pages cap each section
 const MIN_LIVE_ROWS = 5000;    // fewer means a broken read, not a small catalog: fail, don't deploy
 const STATIC_FILES = ['index.html', 'privacy.html', 'terms.html', 'confirmed.html', 'CNAME', 'site.css'];
 
+// ── OpenAI Ads pixel ─────────────────────────────────────────────────────────
+// One copy, put in every generated page and, at copy time, into index.html
+// (its <head> carries a marker comment instead). The two conversions are custom
+// events: oaiq('measure', 'custom', { type: 'custom' }, { custom_event_name }).
+//   get_app     a tap on any App Store link
+//   shop_click  a tap on any affiliate product link (rel="sponsored")
+// The SDK queues the call and flushes by beacon on pagehide, so a link that
+// leaves the page still reports.
+export const PIXEL_ID = 'N364gzhZ9B1oiGKviY5sY7';
+export const PIXEL_HEAD = `<script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"${PIXEL_ID}",debug:true});</script>`;
+export const PIXEL_EVENTS = `<script>
+    ['click', 'auxclick'].forEach(function (type) {
+      document.addEventListener(type, function (e) {
+        var a = e.target.closest && e.target.closest('a[href]'); if (!a || !window.oaiq) return;
+        var name = a.hostname === 'apps.apple.com' ? 'get_app' : a.relList.contains('sponsored') ? 'shop_click' : null;
+        if (name) oaiq('measure', 'custom', { type: 'custom' }, { custom_event_name: name });
+      }, true);
+    });
+  </script>`;
+const PIXEL_MARKER = '<!-- OpenAI Ads pixel: inserted here by scripts/build-site.mjs -->';
+
 // ── purity ───────────────────────────────────────────────────────────────────
 
 /** Natural fiber families, as material text names them. Order is display order. */
@@ -152,7 +173,8 @@ const FIBER_PAGES = [
   { fiber: 'cotton', noun: 'dresses', test: r => r.category === 'dress' },
 ].map(p => ({ ...p, slug: `100-percent-${p.fiber}-${p.noun}`, label: `100% ${p.fiber} ${p.noun}` }));
 
-const BRAND_PAGES = ['Old Navy', 'Gap', 'Quince', 'Everlane', 'Pact'];
+// Brand pages: one per data/brands.json entry, in its order. A brand with no live
+// styles gets no page (and must not be linked from index.html).
 
 export function slugify(name) {
   return String(name).toLowerCase().replace(/&/g, ' and ').replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -288,6 +310,7 @@ function layout({ slug, title, description, h1, lead, body, indexable, related, 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/site.css">
+  ${PIXEL_HEAD}
 </head>
 <body>
   <nav class="top">
@@ -334,6 +357,7 @@ ${body}
       });
     });
   </script>
+  ${PIXEL_EVENTS}
 </body>
 </html>
 `;
@@ -386,8 +410,8 @@ function brandPage(name, rows, brands, blurbs, related, updated) {
   const answer = mainN === all.length && all.length
     ? `Every one of the ${plural(all.length, `${name} style`)} we list is 100% ${main}. That isn't ${name}'s whole catalog: naturalonly lists natural-fiber clothing only.`
     : `Not everything. Of the ${plural(all.length, `${name} style`)} in stock in naturalonly, ${parts.join(', ').replace(/, ([^,]*)$/, ', and $1')}.${leftOut ? ` ${leftOut.toLocaleString('en-US')} more contain elastane or don't state their fabric fully, so they're left off this page.` : ''} naturalonly lists natural-fiber clothing only — anything with polyester, nylon or acrylic never appears here.`;
-  const blurb = blurbs[name]?.blurb;
-  const lead = `<p class="page-lead"><strong>${esc(answer.split('.')[0])}.</strong>${esc(answer.slice(answer.indexOf('.') + 1))}</p>${blurb ? `\n    <p class="brand-blurb">${esc(blurb)}</p>` : ''}`;
+  const { blurb, catalog_note: note } = blurbs[name] || {};
+  const lead = `<p class="page-lead"><strong>${esc(answer.split('.')[0])}.</strong>${esc(answer.slice(answer.indexOf('.') + 1))}</p>${blurb ? `\n    <p class="brand-blurb">${esc(blurb)}</p>` : ''}${note ? `\n    <p class="brand-blurb">${esc(note)}</p>` : ''}`;
 
   const sections = [];
   for (const f of fibers) {
@@ -438,16 +462,22 @@ async function main() {
   for (const r of rows) r.purity = purity(r.material, r.description);
   const blurbFile = path.join(ROOT, 'data', 'brands.json');
   const blurbs = fs.existsSync(blurbFile) ? JSON.parse(fs.readFileSync(blurbFile, 'utf8')) : {};
+  // A page that would list nothing is not built: "Is X 100% cotton?" over zero styles answers nothing.
+  const brandNames = Object.keys(blurbs).filter(name => {
+    const listed = toStyles(rows.filter(r => r.brand === name), brands).filter(s => s.purity.kind === 'single' || s.purity.kind === 'blend').length;
+    if (!listed) console.log(`  skipped brand page: ${name} (no live natural-fiber styles)`);
+    return listed > 0;
+  });
 
   const now = new Date();
   const updated = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/Chicago' });
   const related = [
     ...FIBER_PAGES.map(p => ({ slug: p.slug, label: p.label })),
-    ...BRAND_PAGES.map(b => ({ slug: `brands/${slugify(b)}`, label: b })),
+    ...brandNames.map(b => ({ slug: `brands/${slugify(b)}`, label: b })),
   ];
   const pages = [
     ...FIBER_PAGES.map(spec => fiberPage(spec, rows, brands, related, updated)),
-    ...BRAND_PAGES.map(name => brandPage(name, rows, brands, blurbs, related, updated)),
+    ...brandNames.map(name => brandPage(name, rows, brands, blurbs, related, updated)),
   ];
 
   // index.html's Browse section is hand-written: every generated-page link in it must be a page this build makes.
@@ -459,6 +489,10 @@ async function main() {
   fs.rmSync(out, { recursive: true, force: true });
   fs.mkdirSync(out, { recursive: true });
   for (const f of STATIC_FILES) if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(out, f));
+  // index.html gets the same pixel as the generated pages, from this one copy.
+  const index = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  if (!index.includes(PIXEL_MARKER) || !index.includes('</body>')) throw new Error('index.html is missing the pixel marker comment or </body>');
+  fs.writeFileSync(path.join(out, 'index.html'), index.replace(PIXEL_MARKER, PIXEL_HEAD).replace('</body>', `  ${PIXEL_EVENTS}\n</body>`));
   for (const p of pages) {
     fs.mkdirSync(path.join(out, p.slug), { recursive: true });
     fs.writeFileSync(path.join(out, p.slug, 'index.html'), p.html);

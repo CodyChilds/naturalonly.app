@@ -1,0 +1,82 @@
+{
+  "Quince": {
+    "blurb": "A direct-to-consumer brand that sells factory-direct basics — Mongolian cashmere, European linen, organic cotton and silk — at lower prices by cutting out wholesale markups.",
+    "catalog_note": "Not everything Quince sells is 100% natural; many pieces contain elastane or blends. The items below are the ones that are."
+  },
+  "Organic Basics": {
+    "blurb": "A Copenhagen brand built around GOTS-certified organic cotton underwear, tees and everyday basics, with a stated focus on lower-impact factories.",
+    "catalog_note": "Some of its activewear uses recycled synthetics. Only the all-natural pieces are listed here."
+  },
+  "Colored Organics": {
+    "blurb": "A family-run children's brand making GOTS-certified organic cotton baby and kids' clothing, from bodysuits and pajamas to dresses and sweaters.",
+    "catalog_note": "Nearly the whole range is 100% organic cotton."
+  },
+  "Little Sleepies": {
+    "blurb": "A children's and family sleepwear brand known for soft pajamas, zippies and matching family sets.",
+    "catalog_note": "Only the pieces whose composition meets the 100%-natural rule are listed here."
+  },
+  "Gap": {
+    "blurb": "The American mall staple since 1969 — denim, tees, khakis and sweats for the whole family.",
+    "catalog_note": "Most of Gap's range is a blend. This page is the all-cotton part of it, so you don't have to read every label."
+  },
+  "Old Navy": {
+    "blurb": "Gap Inc.'s value brand, launched in 1994, selling family basics at low prices.",
+    "catalog_note": "Most of Old Navy is a blend. These are the 100% cotton pieces."
+  },
+  "Everlane": {
+    "blurb": "A San Francisco brand founded in 2010 that publishes its factories and cost breakdowns; known for organic cotton tees, linen, cashmere and denim.",
+    "catalog_note": "Everlane also sells stretch and blended pieces; only the all-natural ones appear here."
+  },
+  "Pact": {
+    "blurb": "A Boulder, Colorado brand making GOTS-certified organic cotton basics — underwear, tees, loungewear and bedding — in Fair Trade Certified factories.",
+    "catalog_note": "Almost everything Pact makes is organic cotton; a few pieces add elastane and are left out."
+  },
+  "Jungmaven": {
+    "blurb": "A hemp clothing brand making tees, sweats and basics in hemp and hemp/organic-cotton blends, sewn in the USA.",
+    "catalog_note": "Much of the range is a hemp and organic cotton blend — both natural fibers — so it qualifies, and the composition is shown on each item."
+  },
+  "Smartwool": {
+    "blurb": "A merino wool brand founded in 1994 in Steamboat Springs, Colorado, best known for socks and base layers.",
+    "catalog_note": "Many Smartwool pieces blend merino with nylon for durability. Only the all-wool items are listed here."
+  },
+  "Faherty": {
+    "blurb": "A family-founded brand with a surf-and-beach sensibility, known for sun-washed tees, flannels and knit sweaters.",
+    "catalog_note": "Faherty's performance and 'Movement' lines are synthetic blends; only the all-natural pieces are listed here."
+  },
+  "Taylor Stitch": {
+    "blurb": "A San Francisco menswear brand making workwear-inspired shirts, chinos and knits in organic cotton, hemp and wool, much of it released through small pre-order runs.",
+    "catalog_note": "A few chinos and tees add elastane; those are left out."
+  },
+  "Frank & Eileen": {
+    "blurb": "A Los Angeles brand built around the button-up shirt, cut from Italian-woven cottons and linens, with a growing line of terry and knit basics.",
+    "catalog_note": "Nearly everything is 100% cotton or linen."
+  },
+  "FLAX": {
+    "blurb": "A women's linen label making relaxed, roomy dresses, pants and tunics in a wide size range.",
+    "catalog_note": "Almost the entire line is 100% linen."
+  },
+  "Magic Linen": {
+    "blurb": "A Lithuanian brand sewing clothing and home textiles from European linen, sold in dozens of colourways.",
+    "catalog_note": "Clothing is 100% linen throughout."
+  },
+  "NAADAM": {
+    "blurb": "A New York cashmere brand that buys fibre directly from herders in Mongolia and is known for its lower-priced basics.",
+    "catalog_note": "Some pieces blend cashmere with wool or cotton — both natural — and the composition is shown on each item."
+  },
+  "Icebreaker": {
+    "blurb": "A New Zealand merino wool brand making base layers, socks and outdoor clothing.",
+    "catalog_note": "Many Icebreaker pieces blend merino with nylon or Tencel. Only the all-wool items appear here."
+  },
+  "Toad&Co": {
+    "blurb": "A Santa Barbara brand making casual clothing in hemp, organic cotton and wool, with a long-standing focus on lower-impact fabrics.",
+    "catalog_note": "Toad&Co also uses Tencel and recycled synthetics; those pieces are left out."
+  },
+  "Boden": {
+    "blurb": "A British family-clothing brand known for bright prints and classic cuts, with its Mini Boden line for children.",
+    "catalog_note": "Much of the range is 100% cotton; pieces with elastane or viscose are left out."
+  },
+  "Hill House Home": {
+    "blurb": "A New York brand best known for the Nap Dress, making dresses and separates in cotton poplin, linen and knits.",
+    "catalog_note": "Only the single-fiber pieces are listed; a few styles use blends."
+  }
+}
