@@ -160,30 +160,79 @@ export function resolveAffiliateUrl(productUrl, brand) {
 const TEE = /\b(t-?shirts?|tees?|tee shirts?)\b/i;
 const JEANS = /\b(jeans?|denim)\b/i;
 
-/** The fiber × category pages. `noun` is the page's plural thing, as a shopper searches it. */
-const FIBER_PAGES = [
-  { fiber: 'cotton', noun: 't-shirts', test: r => r.category === 'shirt' && TEE.test(r.name) },
-  { fiber: 'linen', noun: 'pants', test: r => r.category === 'pants' },
-  { fiber: 'cotton', noun: 'underwear', test: r => r.category === 'underwear' },
-  { fiber: 'cotton', noun: 'jeans', test: r => r.category === 'pants' && JEANS.test(r.name),
-    why: 'Most jeans today are cut from stretch denim — cotton with 1–2% elastane. These are rigid, 100% cotton denim.' },
-  { fiber: 'cashmere', noun: 'sweaters', test: r => r.category === 'sweater' },
-  { fiber: 'wool', noun: 'socks', test: r => r.category === 'socks',
-    why: 'Nearly every wool sock adds nylon for durability and elastane for fit. These are knit from wool alone.' },
-  { fiber: 'cotton', noun: 'pajamas', test: r => r.category === 'sleepwear' },
-  { fiber: 'cotton', noun: 'leggings', test: r => r.category === 'leggings',
-    why: 'Leggings almost always rely on elastane for stretch. These get their stretch from the knit, not from synthetics.' },
-  { fiber: 'linen', noun: 'shirts', test: r => r.category === 'shirt' },
-  { fiber: 'cotton', noun: 'sweatpants', test: r => r.category === 'sweatpants' },
-  { fiber: 'linen', noun: 'dresses', test: r => r.category === 'dress' },
-  { fiber: 'cotton', noun: 'hoodies', test: r => r.category === 'hoodie' },
-  { fiber: 'silk', noun: 'pajamas', test: r => r.category === 'sleepwear' },
-  { fiber: 'hemp', noun: 't-shirts', test: r => r.category === 'shirt' && TEE.test(r.name) },
-  { fiber: 'cotton', noun: 'dresses', test: r => r.category === 'dress' },
-].map(p => ({ ...p, slug: `100-percent-${p.fiber}-${p.noun}`, label: `100% ${p.fiber} ${p.noun}` }));
+/** Category → the plural a shopper searches. Uncategorized rows get no page. */
+const CATEGORY_NOUNS = [
+  ['shirt', 'shirts'], ['sweater', 'sweaters'], ['pants', 'pants'], ['dress', 'dresses'], ['underwear', 'underwear'],
+  ['jacket', 'jackets'], ['tank', 'tank tops'], ['shorts', 'shorts'], ['sleepwear', 'pajamas'], ['socks', 'socks'],
+  ['hoodie', 'hoodies'], ['set', 'sets'], ['sweatpants', 'sweatpants'], ['skirt', 'skirts'], ['leggings', 'leggings'],
+  ['accessories', 'accessories'],
+];
+/** Every fiber × category page there could be: each category, plus t-shirts and jeans cut out of shirts and pants. Display order. */
+const CATEGORY_PAGES = [
+  ...CATEGORY_NOUNS.flatMap(([cat, noun]) => [
+    { noun, test: r => r.category === cat },
+    ...(cat === 'shirt' ? [{ noun: 't-shirts', test: r => r.category === 'shirt' && TEE.test(r.name) }] : []),
+    ...(cat === 'pants' ? [{ noun: 'jeans', test: r => r.category === 'pants' && JEANS.test(r.name) }] : []),
+  ]),
+];
+/** The first pages (the spec's list, by search demand): always built, so their URLs never 404; noindex under MIN_STYLES like any other. */
+const CURATED = new Set(['cotton t-shirts', 'linen pants', 'cotton underwear', 'cotton jeans', 'cashmere sweaters', 'wool socks',
+  'cotton pajamas', 'cotton leggings', 'linen shirts', 'cotton sweatpants', 'linen dresses', 'cotton hoodies', 'silk pajamas',
+  'hemp t-shirts', 'cotton dresses']);
+/** The page's "why" copy, where the usual version of the thing is a blend. */
+const WHY = {
+  'cotton jeans': 'Most jeans today are cut from stretch denim — cotton with 1–2% elastane. These are rigid, 100% cotton denim.',
+  'wool socks': 'Nearly every wool sock adds nylon for durability and elastane for fit. These are knit from wool alone.',
+  'cotton leggings': 'Leggings almost always rely on elastane for stretch. These get their stretch from the knit, not from synthetics.',
+};
+/** Gender splits: a page gets a "for men" and a "for women" URL when each side has MIN_STYLES. Unisex rows count on both. */
+const GENDERS = [['W', 'women'], ['M', 'men']];
 
-// Brand pages: one per data/brands.json entry, in its order. A brand with no live
-// styles gets no page (and must not be linked from index.html).
+/**
+ * Which fiber × category (× gender) pages to build, each with its styles:
+ * every combination with MIN_STYLES single-fiber styles, the curated ones
+ * whatever their count, and the gender pair where both sides reach MIN_STYLES.
+ */
+function planFiberPages(rows, brands) {
+  const byFiber = new Map();
+  for (const r of rows) {
+    if (r.purity.kind !== 'single') continue;
+    if (!byFiber.has(r.purity.fiber)) byFiber.set(r.purity.fiber, []);
+    byFiber.get(r.purity.fiber).push(r);
+  }
+  const plans = [];
+  for (const [fiber] of FAMILIES) {
+    for (const c of CATEGORY_PAGES) {
+      const key = `${fiber} ${c.noun}`;
+      const qualifying = (byFiber.get(fiber) || []).filter(c.test);
+      const styles = toStyles(qualifying, brands);
+      if (styles.length < MIN_STYLES && !CURATED.has(key)) continue;
+      const base = { fiber, noun: c.noun, slug: `100-percent-${fiber}-${slugify(c.noun)}`, label: `100% ${key}`, why: WHY[key], styles };
+      plans.push(base);
+      if (styles.length < MIN_STYLES) continue;
+      const sides = GENDERS.map(([g, word]) => ({ word, styles: toStyles(qualifying.filter(r => (r.gender || []).includes(g)), brands) }));
+      if (sides.every(x => x.styles.length >= MIN_STYLES)) {
+        for (const x of sides) plans.push({ ...base, gender: x.word, slug: `${base.slug}-for-${x.word}`, label: `${base.label} for ${x.word}`, styles: x.styles });
+      }
+    }
+  }
+  return plans;
+}
+
+/** A page's "More 100% natural" links: its gender siblings, its fiber's other pages, the same thing in other fibers. */
+function relatedForFiber(plan, plans) {
+  const bases = plans.filter(p => !p.gender && p.styles.length >= MIN_STYLES && p.slug !== plan.slug);
+  const bySize = (a, b) => b.styles.length - a.styles.length;
+  return [
+    ...plans.filter(p => p.fiber === plan.fiber && p.noun === plan.noun && p.slug !== plan.slug),
+    ...bases.filter(p => p.fiber === plan.fiber && p.noun !== plan.noun).sort(bySize).slice(0, 10),
+    ...bases.filter(p => p.noun === plan.noun && p.fiber !== plan.fiber).sort(bySize).slice(0, 6),
+  ];
+}
+
+// Brand pages: every brand with MIN_STYLES single-fiber styles, and every
+// data/brands.json entry with any natural-fiber style (noindex under MIN_STYLES
+// single-fiber ones). A brand with nothing to list gets no page.
 
 export function slugify(name) {
   return String(name).toLowerCase().replace(/&/g, ' and ').replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -372,9 +421,8 @@ ${body}
 `;
 }
 
-function fiberPage(spec, rows, brands, related, updated) {
-  const qualifying = rows.filter(r => r.purity.kind === 'single' && r.purity.fiber === spec.fiber && spec.test(r));
-  const styles = toStyles(qualifying, brands);
+function fiberPage(spec, related, updated) {
+  const styles = spec.styles;
   const shown = styles.slice(0, MAX_CARDS);
   const brandCount = new Set(styles.map(s => s.brand)).size;
   const indexable = styles.length >= MIN_STYLES;
@@ -390,7 +438,7 @@ ${shown.map(s => card(s)).join('\n')}
       ${styles.length > shown.length ? `<p class="more">Showing ${shown.length} of ${styles.length.toLocaleString('en-US')}. <a href="${APP_STORE}">See them all in the app</a>.</p>` : ''}
     </section>
     <section class="why"><h2>Why some ${esc(`${spec.fiber} ${spec.noun}`)} aren't here</h2><p>${esc(why)}</p></section>`;
-  return { slug: spec.slug, label: spec.label, styles: styles.length, brands: brandCount, indexable,
+  return { slug: spec.slug, label: spec.label, fiber: spec.fiber, noun: spec.noun, gender: spec.gender, styles: styles.length, brands: brandCount, indexable,
     html: layout({ slug: spec.slug, title, description, h1: cap(spec.label), lead, body, indexable, related, updated }) };
 }
 
@@ -410,7 +458,7 @@ function brandPage(name, rows, brands, blurbs, related, updated) {
   const mainN = byFiber.get(main)?.length || 0;
   const listed = singles.length + blends.length;
   const slug = `brands/${slugify(name)}`;
-  const indexable = listed >= MIN_STYLES;
+  const indexable = singles.length >= MIN_STYLES;
 
   const parts = [`${mainN.toLocaleString('en-US')} ${mainN === 1 ? 'is' : 'are'} 100% ${main}`];
   const otherSingles = singles.length - mainN;
@@ -446,11 +494,32 @@ ${shown.map(s => card(s, { showBrand: false, showFabric: true })).join('\n')}
   }
   const title = `Is ${name} 100% ${main}? ${plural(listed, 'natural-fiber style')} | naturalonly`;
   const description = `Which ${name} clothing is 100% ${main}? ${plural(mainN, 'style')} checked against ${name}'s own fabric content, plus every other natural-fiber piece. Updated nightly.`;
-  return { slug, label: `${name}: 100% natural`, styles: listed, brands: 1, indexable,
+  return { slug, label: name, name, styles: listed, brands: 1, indexable,
     html: layout({ slug, title, description, h1: `Is ${name} 100% ${main}?`, lead, body: sections.join('\n'), indexable, related, updated }) };
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────
+
+const BROWSE_MARKER = '<!-- Browse links: written here by scripts/build-site.mjs -->';
+
+/** The homepage Browse section's links: indexed fiber pages grouped by fiber, then every brand page, alphabetical. */
+function browseHtml(pages) {
+  const fiberPages = pages.filter(p => p.fiber && p.indexable);
+  const groups = FAMILIES.map(([f]) => [f, fiberPages.filter(p => p.fiber === f)]).filter(([, ps]) => ps.length);
+  const a = (p, text) => `<a class="browse-link" href="/${p.slug}/" title="${esc(p.label)}">${esc(text)}</a>`;
+  const fibers = groups.map(([f, ps]) => `      <div class="browse-group">
+        <p class="browse-fiber">100% ${esc(f)}</p>
+        <div class="browse-grid">
+${ps.map(p => `          ${a(p, p.gender ? `${p.noun} for ${p.gender}` : p.noun)}`).join('\n')}
+        </div>
+      </div>`).join('\n');
+  const brandsHtml = pages.filter(p => p.name).map(p => `        ${a(p, p.name)}`).join('\n');
+  return `${fibers}
+      <p class="section-label" style="margin-top:2.5rem; margin-bottom:1rem;">By brand</p>
+      <div class="browse-grid">
+${brandsHtml}
+      </div>`;
+}
 
 function sitemap(pages, updatedIso) {
   const urls = ['/', '/privacy', '/terms', ...pages.filter(p => p.indexable).map(p => `/${p.slug}/`)];
@@ -471,27 +540,49 @@ async function main() {
   for (const r of rows) r.purity = purity(r.material, r.description);
   const blurbFile = path.join(ROOT, 'data', 'brands.json');
   const blurbs = fs.existsSync(blurbFile) ? JSON.parse(fs.readFileSync(blurbFile, 'utf8')) : {};
-  // A page that would list nothing is not built: "Is X 100% cotton?" over zero styles answers nothing.
-  const brandNames = Object.keys(blurbs).filter(name => {
-    const listed = toStyles(rows.filter(r => r.brand === name), brands).filter(s => s.purity.kind === 'single' || s.purity.kind === 'blend').length;
-    if (!listed) console.log(`  skipped brand page: ${name} (no live natural-fiber styles)`);
-    return listed > 0;
-  });
+  // Brands: every one with MIN_STYLES single-fiber styles, plus each brands.json
+  // entry with anything natural to list. A page that would list nothing is not
+  // built: "Is X 100% cotton?" over zero styles answers nothing.
+  const byBrand = new Map();
+  for (const r of rows) {
+    if (!byBrand.has(r.brand)) byBrand.set(r.brand, []);
+    byBrand.get(r.brand).push(r);
+  }
+  const brandFacts = new Map();
+  for (const [name, rs] of byBrand) {
+    const styles = toStyles(rs, brands);
+    const singles = styles.filter(x => x.purity.kind === 'single');
+    brandFacts.set(name, { singles: singles.length, listed: singles.length + styles.filter(x => x.purity.kind === 'blend').length,
+      fibers: new Set(singles.map(x => x.purity.fiber)) });
+  }
+  for (const name of Object.keys(blurbs)) {
+    if (!brandFacts.get(name)?.listed) console.log(`  skipped brand page: ${name} (no live natural-fiber styles)`);
+  }
+  const brandNames = [...brandFacts.keys()]
+    .filter(name => brandFacts.get(name).singles >= MIN_STYLES || (name in blurbs && brandFacts.get(name).listed > 0))
+    .sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
 
   const now = new Date();
   const updated = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/Chicago' });
-  const related = [
-    ...FIBER_PAGES.map(p => ({ slug: p.slug, label: p.label })),
-    ...brandNames.map(b => ({ slug: `brands/${slugify(b)}`, label: b })),
-  ];
+  const plans = planFiberPages(rows, brands);
+  const link = p => ({ slug: p.slug, label: p.label });
+  const fiberBases = plans.filter(p => !p.gender && p.styles.length >= MIN_STYLES).sort((a, b) => b.styles.length - a.styles.length);
   const pages = [
-    ...FIBER_PAGES.map(spec => fiberPage(spec, rows, brands, related, updated)),
-    ...brandNames.map(name => brandPage(name, rows, brands, blurbs, related, updated)),
+    ...plans.map(plan => fiberPage(plan, relatedForFiber(plan, plans).map(link), updated)),
+    ...brandNames.map(name => brandPage(name, byBrand.get(name), brands, blurbs,
+      fiberBases.filter(p => brandFacts.get(name).fibers.has(p.fiber)).slice(0, 12).map(link), updated)),
   ];
+  const slugs = pages.map(p => p.slug);
+  const clash = slugs.find((x, i) => slugs.indexOf(x) !== i);
+  if (clash) throw new Error(`two pages share the URL /${clash}/`);
 
-  // index.html's Browse section is hand-written: every generated-page link in it must be a page this build makes.
+  // index.html's Browse section is written here, from the pages built: fiber pages
+  // grouped by fiber, brands alphabetical. Any other generated-page link in
+  // index.html must still be a page this build makes.
   const built = new Set(pages.map(p => `/${p.slug}/`));
-  const linked = [...fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').matchAll(/href="(\/(?:100-percent-[a-z-]+|brands\/[a-z0-9-]+)\/)"/g)].map(m => m[1]);
+  const source = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  if (!source.includes(BROWSE_MARKER)) throw new Error('index.html is missing the Browse marker comment');
+  const linked = [...source.matchAll(/href="(\/(?:100-percent-[a-z-]+|brands\/[a-z0-9-]+)\/)"/g)].map(m => m[1]);
   const dangling = linked.filter(l => !built.has(l));
   if (dangling.length) throw new Error(`index.html links pages this build does not make: ${dangling.join(', ')}`);
 
@@ -499,9 +590,9 @@ async function main() {
   fs.mkdirSync(out, { recursive: true });
   for (const f of STATIC_FILES) if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(out, f));
   // index.html gets the same pixel as the generated pages, from this one copy.
-  const index = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  if (!index.includes(PIXEL_MARKER) || !index.includes('</body>')) throw new Error('index.html is missing the pixel marker comment or </body>');
-  fs.writeFileSync(path.join(out, 'index.html'), index.replace(PIXEL_MARKER, PIXEL_HEAD).replace('</body>', `  ${PIXEL_EVENTS}\n</body>`));
+  if (!source.includes(PIXEL_MARKER) || !source.includes('</body>')) throw new Error('index.html is missing the pixel marker comment or </body>');
+  fs.writeFileSync(path.join(out, 'index.html'), source.replace(BROWSE_MARKER, () => browseHtml(pages))
+    .replace(PIXEL_MARKER, PIXEL_HEAD).replace('</body>', `  ${PIXEL_EVENTS}\n</body>`));
   for (const p of pages) {
     fs.mkdirSync(path.join(out, p.slug), { recursive: true });
     fs.writeFileSync(path.join(out, p.slug, 'index.html'), p.html);
@@ -513,7 +604,8 @@ async function main() {
   for (const r of rows) tally[r.purity.kind] = (tally[r.purity.kind] || 0) + 1;
   console.log(`\n  ${rows.length.toLocaleString('en-US')} live rows · purity ${JSON.stringify(tally)}\n`);
   for (const p of pages) console.log(`  ${p.indexable ? 'index  ' : 'NOINDEX'}  ${String(p.styles).padStart(5)} styles  ${String(p.brands).padStart(3)} brands  /${p.slug}/`);
-  console.log(`\n  wrote ${pages.length} pages to ${out}\n`);
+  const n = pages.filter(p => p.indexable).length;
+  console.log(`\n  wrote ${pages.length} pages to ${out}: ${n} indexed, ${pages.length - n} noindex · ${plans.length} fiber, ${brandNames.length} brand\n`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
