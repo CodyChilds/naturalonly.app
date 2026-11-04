@@ -38,10 +38,11 @@ const STATIC_FILES = ['index.html', 'privacy.html', 'terms.html', 'confirmed.htm
 
 // ── OpenAI Ads pixel ─────────────────────────────────────────────────────────
 // One copy, put in every generated page and, at copy time, into index.html
-// (its <head> carries a marker comment instead). The two conversions are custom
-// events: oaiq('measure', 'custom', { type: 'custom' }, { custom_event_name }).
-//   get_app     a tap on any App Store link
-//   shop_click  a tap on any affiliate product link (rel="sponsored")
+// (its <head> carries a marker comment instead). The two conversions are the
+// SDK's standard events (Ads Manager has no custom type); each one's data.type
+// must be its SDK category or the SDK drops it:
+//   lead_created      { type: 'customer_action' }  a tap on any App Store link
+//   checkout_started  { type: 'contents' }         a tap on any affiliate product link (rel="sponsored")
 // The SDK queues the call and flushes by beacon on pagehide, so a link that
 // leaves the page still reports.
 export const PIXEL_ID = 'N364gzhZ9B1oiGKviY5sY7';
@@ -50,8 +51,8 @@ export const PIXEL_EVENTS = `<script>
     ['click', 'auxclick'].forEach(function (type) {
       document.addEventListener(type, function (e) {
         var a = e.target.closest && e.target.closest('a[href]'); if (!a || !window.oaiq) return;
-        var name = a.hostname === 'apps.apple.com' ? 'get_app' : a.relList.contains('sponsored') ? 'shop_click' : null;
-        if (name) oaiq('measure', 'custom', { type: 'custom' }, { custom_event_name: name });
+        if (a.hostname === 'apps.apple.com') oaiq('measure', 'lead_created', { type: 'customer_action' });
+        else if (a.relList.contains('sponsored')) oaiq('measure', 'checkout_started', { type: 'contents' });
       }, true);
     });
   </script>`;
