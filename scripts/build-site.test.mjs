@@ -4,7 +4,7 @@
  *   node scripts/build-site.test.mjs
  */
 import assert from 'node:assert/strict';
-import { purity, baseName, slugify, resolveAffiliateUrl, sizedImage } from './build-site.mjs';
+import { purity, baseName, slugify, resolveAffiliateUrl, sizedImage, readAll } from './build-site.mjs';
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -98,6 +98,50 @@ test('slugs and affiliate links', () => {
   assert.equal(resolveAffiliateUrl(u, { affiliate_param: 'ref=no' }), `${u}&ref=no`);
   assert.equal(resolveAffiliateUrl(`${u}&ref=no`, { affiliate_param: 'ref=no' }), `${u}&ref=no`);
   assert.equal(resolveAffiliateUrl(u, null), u);
+});
+
+// readAll: a fake table of ids 1..n; `timeouts` lists the page sizes that time out.
+const TIMEOUT = 'Supabase products: 500 {"code":"57014","details":null,"hint":null,"message":"canceling statement due to statement timeout"}';
+function fakeTable(n, timeoutAbove = Infinity, calls = []) {
+  const ids = Array.from({ length: n }, (_, i) => ({ id: i + 1 }));
+  return async (size, after) => {
+    calls.push([size, after]);
+    if (size > timeoutAbove) throw new Error(TIMEOUT);
+    return ids.filter(r => after == null || r.id > after).slice(0, size);
+  };
+}
+const quiet = { waitMs: 0, log: () => {} };
+
+async function testAsync(name, fn) {
+  try { await fn(); passed++; console.log(`  ok   ${name}`); }
+  catch (e) { failed++; console.log(`  FAIL ${name}\n       ${e.message}`); }
+}
+
+await testAsync('readAll pages by id and reads every row once', async () => {
+  const calls = [];
+  const rows = await readAll(fakeTable(2500, Infinity, calls), quiet);
+  assert.equal(rows.length, 2500);
+  assert.equal(new Set(rows.map(r => r.id)).size, 2500);
+  assert.deepEqual(calls, [[1000, null], [1000, 1000], [1000, 2000]]);
+});
+
+await testAsync('readAll halves the page on a statement timeout and keeps the smaller size', async () => {
+  const calls = [];
+  const rows = await readAll(fakeTable(700, 300, calls), quiet);
+  assert.equal(rows.length, 700);
+  assert.deepEqual(calls.map(c => c[0]), [1000, 500, 250, 250, 250]);
+});
+
+await testAsync('readAll gives up after five tries at the smallest page', async () => {
+  const calls = [];
+  await assert.rejects(readAll(fakeTable(100, 0, calls), quiet), /57014/);
+  assert.deepEqual(calls.map(c => c[0]), [1000, 500, 250, 125, 62, 31, 25, 25, 25, 25, 25, 25]);
+});
+
+await testAsync('readAll does not retry other errors', async () => {
+  let n = 0;
+  await assert.rejects(readAll(async () => { n++; throw new Error('Supabase products: 401 {"message":"Invalid API key"}'); }, quiet), /401/);
+  assert.equal(n, 1);
 });
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

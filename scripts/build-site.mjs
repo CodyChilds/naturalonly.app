@@ -246,14 +246,40 @@ async function rest(query, key) {
   return res.json();
 }
 
+/** PostgREST's answer when Postgres cancelled the query: statement timeout (57014). */
+const isTimeout = e => /"code":"57014"|statement timeout/.test(e.message);
+
+/**
+ * Every row of a query, keyset-paged by id. A page that hits the statement
+ * timeout is asked again at half the size, down to `minPage`, then five more
+ * tries there; the smaller size holds for the rest of the read. The same
+ * pattern as natural-only's pipeline-run.mjs selectAll. `page(size, afterId)`
+ * returns that page's rows. Tested.
+ */
+export async function readAll(page, { startPage = 1000, minPage = 25, waitMs = 1000, log = console.log } = {}) {
+  const out = []; let last = null, size = startPage;
+  for (;;) {
+    let rows;
+    for (let floorTries = 0; ; ) {
+      try { rows = await page(size, last); break; }
+      catch (e) {
+        if (!isTimeout(e)) throw e;
+        if (size > minPage) size = Math.max(minPage, Math.floor(size / 2));
+        else if (++floorTries > 5) throw e;
+        log(`  statement timeout after ${out.length} rows — retrying at ${size} per page`);
+        await new Promise(r => setTimeout(r, waitMs * (floorTries + 1)));
+      }
+    }
+    out.push(...rows);
+    if (rows.length < size) return out;
+    last = rows.at(-1).id;
+  }
+}
+
 async function readCatalog(key) {
   const cols = 'id,brand,name,price,fiber,category,gender,color,image_url,affiliate_url,availability,listing_key,published_at,description,material:attrs->>material_raw';
-  const rows = [];
-  for (let from = 0; ; from += 1000) {
-    const page = await rest(`products?select=${cols}&is_active=eq.true&order=id&limit=1000&offset=${from}`, key);
-    rows.push(...page);
-    if (page.length < 1000) break;
-  }
+  const rows = await readAll((size, after) =>
+    rest(`products?select=${cols}&is_active=eq.true${after ? `&id=gt.${after}` : ''}&order=id&limit=${size}`, key));
   if (rows.length < MIN_LIVE_ROWS) throw new Error(`only ${rows.length} live rows read (expected ≥ ${MIN_LIVE_ROWS}) — refusing to build`);
   const brands = await rest('brands?select=name,url,affiliate_url_template,affiliate_param', key);
   return { rows, brands: new Map(brands.map(b => [b.name, b])) };
