@@ -1,10 +1,12 @@
 /**
- * build-site's pure parts: the purity reading, the name and link helpers. No network.
+ * build-site's pure parts: the purity reading, the name and link helpers, the /app
+ * page and the pixel's tap handler. No network.
  *
  *   node scripts/build-site.test.mjs
  */
 import assert from 'node:assert/strict';
-import { purity, baseName, slugify, resolveAffiliateUrl, sizedImage, readAll } from './build-site.mjs';
+import { purity, baseName, slugify, resolveAffiliateUrl, sizedImage, readAll,
+  adsPage, countLine, appSearchLink, fiberGridHtml, sitemap, ADS_SEARCHES, PIXEL_EVENTS, PIXEL_HEAD } from './build-site.mjs';
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -142,6 +144,99 @@ await testAsync('readAll does not retry other errors', async () => {
   let n = 0;
   await assert.rejects(readAll(async () => { n++; throw new Error('Supabase products: 401 {"message":"Invalid API key"}'); }, quiet), /401/);
   assert.equal(n, 1);
+});
+
+// ── /app ─────────────────────────────────────────────────────────────────────
+
+const PAGES = [
+  { slug: '100-percent-linen-dresses', label: '100% linen dresses', fiber: 'linen', noun: 'dresses', indexable: true },
+  { slug: '100-percent-wool-sweaters-men', label: "100% wool men's sweaters", fiber: 'wool', noun: 'sweaters', gender: 'men', indexable: true },
+  { slug: '100-percent-silk-socks', label: '100% silk socks', fiber: 'silk', noun: 'socks', indexable: false },
+  { slug: 'brands/flax', label: 'FLAX', name: 'FLAX', indexable: true },
+];
+const ADS = adsPage({ pieces: 27_946, brands: 60, grid: fiberGridHtml(PAGES), updated: 'November 14, 2026' }).html;
+
+test('count line: pieces rounded down to the thousand, never up', () => {
+  assert.equal(countLine(28_412, 60), '28,000+ pieces from 60 brands. Search anything.');
+  assert.equal(countLine(27_999, 61), '27,000+ pieces from 61 brands. Search anything.');
+  assert.equal(countLine(28_000, 1), '28,000+ pieces from 1 brand. Search anything.');
+  assert.equal(countLine(640, 3), '640 pieces from 3 brands. Search anything.');
+});
+
+test('app search links open discover with the query encoded', () => {
+  assert.equal(appSearchLink("men's wool sweater"), "naturalonly://discover?query=men's%20wool%20sweater");
+  assert.equal(appSearchLink('linen dress'), 'naturalonly://discover?query=linen%20dress');
+});
+
+test('/app above the fold: headline, live count, badge to the App Store, three search chips', () => {
+  assert.ok(ADS.includes('<h1 class="ads-headline">100% natural fibers. No polyester, no nylon, no acrylic.</h1>'));
+  assert.ok(ADS.includes('27,000+ pieces from 60 brands. Search anything.'));
+  assert.match(ADS, /<a class="ads-badge" href="https:\/\/apps\.apple\.com\/app\/naturalonly\/id6788215014"><img src="\/app-store-badge\.svg" alt="Download on the App Store"/);
+  const chips = [...ADS.matchAll(/<a class="ads-search" href="([^"]+)" data-search>([^<]+)<\/a>/g)];
+  assert.deepEqual(chips.map(m => m[2].replace(/&#39;/g, "'")), ADS_SEARCHES);
+  assert.deepEqual(ADS_SEARCHES, ['linen dress', "men's wool sweater", 'cotton pajamas']);
+  for (const m of chips) assert.ok(m[1].startsWith('naturalonly://discover?query='), m[1]);
+  assert.ok(ADS.indexOf('ads-search') < ADS.indexOf('browse-group'), 'the chips come before the fiber grid');
+});
+
+test('/app is noindex with no canonical; the sitemap lists it anyway', () => {
+  assert.ok(ADS.includes('<meta name="robots" content="noindex, follow">'));
+  assert.ok(!ADS.includes('rel="canonical"'));
+  const xml = sitemap(PAGES, '2026-11-14');
+  assert.ok(xml.includes('<loc>https://naturalonly.app/app/</loc>'));
+  assert.ok(!xml.includes('100-percent-silk-socks'), 'noindex fiber pages stay out');
+});
+
+test('/app below the fold: the fiber grid (indexed fiber pages only, no brands); footer elastane note and disclosure', () => {
+  assert.ok(ADS.includes('href="/100-percent-linen-dresses/"') && ADS.includes('>sweaters for men<'));
+  assert.ok(!ADS.includes('100-percent-silk-socks') && !ADS.includes('/brands/flax/'));
+  const footer = ADS.slice(ADS.indexOf('<footer>'), ADS.indexOf('</footer>'));
+  assert.ok(footer.includes('A small amount of elastane (up to 10%) is allowed for stretch.'));
+  assert.ok(footer.includes('naturalonly may earn a commission when you buy through links on this page'));
+  assert.ok(ADS.includes(PIXEL_HEAD) && ADS.includes(PIXEL_EVENTS));
+});
+
+test('/app carries utm_* params to the App Store and app links, and falls back to the App Store', () => {
+  assert.match(ADS, /if \(\/\^utm_\/i\.test\(k\)\) utm\.append\(k, v\)/);
+  assert.ok(ADS.includes(`a[href^="https://apps.apple.com/"], a[data-search]`));
+  assert.match(ADS, /location\.href = withUtm\(STORE\); \}, 1500\)/);
+});
+
+// The pixel's tap handler, run against a stub document: one tap, one event.
+function pixelHarness() {
+  const handlers = [], sent = [];
+  const document = { addEventListener: (type, fn) => handlers.push({ type, fn }) };
+  const window = { oaiq: (...a) => sent.push(a) };
+  new Function('document', 'window', 'oaiq', PIXEL_EVENTS.replace(/<\/?script>/g, ''))(document, window, window.oaiq);
+  const link = (href, { sponsored = false, search = false } = {}) => {
+    const u = new URL(href);
+    return { hostname: u.hostname, relList: { contains: r => sponsored && r === 'sponsored' }, hasAttribute: n => search && n === 'data-search' };
+  };
+  const tap = (a, t, type = 'click', button = type === 'click' ? 0 : 1) =>
+    handlers.filter(h => h.type === type).forEach(h => h.fn({ button, timeStamp: t, target: { closest: () => a } }));
+  return { sent, link, tap };
+}
+
+test('pixel: badge tap is lead_created, chip tap is the custom "search" event, product tap is checkout_started', () => {
+  const { sent, link, tap } = pixelHarness();
+  tap(link('https://apps.apple.com/app/naturalonly/id6788215014?utm_source=chatgpt'), 5000);
+  tap(link(appSearchLink('linen dress'), { search: true }), 5010);
+  tap(link('https://flax.com/products/a', { sponsored: true }), 5020);
+  tap(link('https://naturalonly.app/100-percent-linen-dresses/'), 5030);
+  assert.deepEqual(sent, [
+    ['measure', 'lead_created', { type: 'customer_action' }],
+    ['measure', 'custom', { type: 'custom' }, { custom_event_name: 'search' }],
+    ['measure', 'checkout_started', { type: 'contents' }],
+  ]);
+});
+
+test('pixel: a double tap or a second chip within a second sends one search; a right click sends none', () => {
+  const { sent, link, tap } = pixelHarness();
+  const chip = link(appSearchLink('cotton pajamas'), { search: true });
+  tap(chip, 5000); tap(chip, 5400); tap(link(appSearchLink('linen dress'), { search: true }), 5900);
+  tap(chip, 5100, 'auxclick', 2);
+  tap(chip, 6500);
+  assert.equal(sent.length, 2);
 });
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

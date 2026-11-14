@@ -21,6 +21,8 @@
  *
  * A page with fewer than MIN_STYLES qualifying styles is still built, but
  * noindex and left out of the sitemap.
+ *
+ * /app/ is the paid-ads landing page (adsPage): noindex, but in the sitemap.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -34,7 +36,7 @@ const APP_STORE = 'https://apps.apple.com/app/naturalonly/id6788215014';
 const MIN_STYLES = 12;
 const MAX_CARDS = 72;          // per fiber page; brand pages cap each section
 const MIN_LIVE_ROWS = 5000;    // fewer means a broken read, not a small catalog: fail, don't deploy
-const STATIC_FILES = ['index.html', 'privacy.html', 'terms.html', 'confirmed.html', 'CNAME', 'site.css'];
+const STATIC_FILES = ['index.html', 'privacy.html', 'terms.html', 'confirmed.html', 'CNAME', 'site.css', 'app-store-badge.svg'];
 
 // ── OpenAI Ads pixel ─────────────────────────────────────────────────────────
 // One copy, put in every generated page and, at copy time, into index.html
@@ -43,6 +45,8 @@ const STATIC_FILES = ['index.html', 'privacy.html', 'terms.html', 'confirmed.htm
 // must be its SDK category or the SDK drops it:
 //   lead_created      { type: 'customer_action' }  a tap on any App Store link
 //   checkout_started  { type: 'contents' }         a tap on any affiliate product link (rel="sponsored")
+// and one custom event, which the SDK takes but Ads Manager can't optimise on:
+//   custom "search"   { type: 'custom' }           a tap on a search chip (data-search), /app only
 // The SDK queues the call and flushes by beacon on pagehide, so a link that
 // leaves the page still reports. It sends each call once (checked 2026-11-03 with
 // its network stubbed: a tap, and a tap whose send was cut off by the page hiding).
@@ -57,10 +61,12 @@ export const PIXEL_EVENTS = `<script>
       document.addEventListener(type, function (e) {
         if (e.button !== (type === 'click' ? 0 : 1)) return;
         var a = e.target.closest && e.target.closest('a[href]'); if (!a || !window.oaiq) return;
-        var name = a.hostname === 'apps.apple.com' ? 'lead_created' : a.relList.contains('sponsored') ? 'checkout_started' : null;
+        var name = a.hostname === 'apps.apple.com' ? 'lead_created' : a.relList.contains('sponsored') ? 'checkout_started'
+          : a.hasAttribute('data-search') ? 'search' : null;
         if (!name || e.timeStamp - (oaiqLast[name] || -1e9) < 1000) return;
         oaiqLast[name] = e.timeStamp;
-        oaiq('measure', name, { type: name === 'lead_created' ? 'customer_action' : 'contents' });
+        if (name === 'search') oaiq('measure', 'custom', { type: 'custom' }, { custom_event_name: 'search' });
+        else oaiq('measure', name, { type: name === 'lead_created' ? 'customer_action' : 'contents' });
       }, true);
     });
   </script>`;
@@ -524,31 +530,147 @@ ${shown.map(s => card(s, { showBrand: false, showFabric: true })).join('\n')}
     html: layout({ slug, title, description, h1: `Is ${name} 100% ${main}?`, lead, body: sections.join('\n'), indexable, related, updated }) };
 }
 
+// ── /app: the paid-ads landing page ──────────────────────────────────────────
+// Phone-first: everything a tap needs sits above the fold, the fiber grid below.
+// noindex (ad traffic only). The App Store badge fires lead_created through the
+// shared pixel handler; a search chip fires the custom "search" event, opens the
+// app's search, and falls back to the App Store when the app does not open.
+// utm_* params on the landing URL ride along on the App Store and app links.
+
+export const ADS_SLUG = 'app';
+export const ADS_SEARCHES = ['linen dress', "men's wool sweater", 'cotton pajamas'];
+const ADS_HEADLINE = '100% natural fibers. No polyester, no nylon, no acrylic.';
+const ELASTANE_NOTE = 'A small amount of elastane (up to 10%) is allowed for stretch. The 100% pages on this site list single-fiber pieces only.';
+const APP_OPEN_WAIT_MS = 1500;   // no hide by then: the app is not installed, go to the App Store
+
+/** The app's search screen for a query (expo-router: app/(tabs)/discover.tsx reads ?query=). */
+export function appSearchLink(query) {
+  return `naturalonly://discover?query=${encodeURIComponent(query)}`;
+}
+
+/** "28,000+ pieces from 60 brands": pieces rounded down to the thousand, so the claim stays true; brands exact. */
+export function countLine(pieces, brands) {
+  const n = pieces >= 1000 ? `${(Math.floor(pieces / 1000) * 1000).toLocaleString('en-US')}+` : pieces.toLocaleString('en-US');
+  return `${n} ${pieces === 1 ? 'piece' : 'pieces'} from ${plural(brands, 'brand')}. Search anything.`;
+}
+
+/** The /app page. Pure; tested. */
+export function adsPage({ pieces, brands, grid, updated }) {
+  const title = 'naturalonly — 100% natural-fiber clothing, one search';
+  const description = `${countLine(pieces, brands)} Every listing checked for polyester, nylon and acrylic.`;
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>${esc(title)}</title>
+  <meta name="description" content="${esc(description)}">
+  <meta name="robots" content="noindex, follow">
+  <meta name="apple-itunes-app" content="app-id=6788215014">
+  <meta property="og:title" content="${esc(title)}">
+  <meta property="og:description" content="${esc(description)}">
+  <meta property="og:url" content="${SITE}/${ADS_SLUG}/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site.css">
+  ${PIXEL_HEAD}
+</head>
+<body>
+  <nav class="top">
+    <a class="nav-wordmark" href="/"><span class="natural">natural</span><span class="only">only</span></a>
+  </nav>
+  <header class="ads-hero">
+    <h1 class="ads-headline">${esc(ADS_HEADLINE)}</h1>
+    <p class="ads-count">${esc(countLine(pieces, brands))}</p>
+    <a class="ads-badge" href="${APP_STORE}"><img src="/app-store-badge.svg" alt="Download on the App Store" width="180" height="60"></a>
+    <p class="ads-try">Try a search</p>
+    <div class="ads-searches">
+${ADS_SEARCHES.map(q => `      <a class="ads-search" href="${esc(appSearchLink(q))}" data-search>${esc(q)}</a>`).join('\n')}
+    </div>
+  </header>
+  <main>
+    <section class="ads-fibers">
+      <p class="section-label">Browse by fiber</p>
+      <h2 class="section-title">100% one fiber, nothing else</h2>
+      <p class="section-sub">Every piece on these pages is a single natural fiber by the brand's own fabric listing. Updated nightly.</p>
+${grid}
+    </section>
+  </main>
+  <footer>
+    <div class="footer-wordmark"><span class="natural">natural</span><span class="only">only</span></div>
+    <div class="footer-links">
+      <a href="mailto:hello@naturalonly.app">Contact</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
+    </div>
+    <p class="footer-note">${esc(ELASTANE_NOTE)}</p>
+    <p class="footer-note">${DISCLOSURE} Updated ${esc(updated)}.</p>
+    <p class="footer-copy">© 2026 CalShep Co LLC · naturalonly</p>
+  </footer>
+  ${PIXEL_EVENTS}
+  <script>
+    (function () {
+      var STORE = ${JSON.stringify(APP_STORE)};
+      var utm = new URLSearchParams();
+      new URLSearchParams(location.search).forEach(function (v, k) { if (/^utm_/i.test(k)) utm.append(k, v); });
+      function withUtm(href) { var q = utm.toString(); return q ? href + (href.indexOf('?') < 0 ? '?' : '&') + q : href; }
+      document.querySelectorAll('a[href^="https://apps.apple.com/"], a[data-search]').forEach(function (a) {
+        a.setAttribute('href', withUtm(a.getAttribute('href')));
+      });
+      // A chip opens the app's search; if the page is still showing when the wait
+      // is up, the app did not open, so go to the App Store. A redirect, not a tap:
+      // the pixel's handler has already sent "search" and sends nothing for it.
+      document.addEventListener('click', function (e) {
+        if (e.button !== 0) return;
+        var a = e.target.closest && e.target.closest('a[data-search]'); if (!a) return;
+        e.preventDefault();
+        var left = false;
+        function gone() { left = true; }
+        document.addEventListener('visibilitychange', function () { if (document.hidden) gone(); }, { once: true });
+        window.addEventListener('pagehide', gone, { once: true });
+        location.href = a.getAttribute('href');
+        setTimeout(function () { if (!left && !document.hidden) location.href = withUtm(STORE); }, ${APP_OPEN_WAIT_MS});
+      });
+    })();
+  </script>
+</body>
+</html>
+`;
+  return { slug: ADS_SLUG, html };
+}
+
 // ── main ─────────────────────────────────────────────────────────────────────
 
 const BROWSE_MARKER = '<!-- Browse links: written here by scripts/build-site.mjs -->';
 
-/** The homepage Browse section's links: indexed fiber pages grouped by fiber, then every brand page, alphabetical. */
-function browseHtml(pages) {
+const browseLink = (p, text) => `<a class="browse-link" href="/${p.slug}/" title="${esc(p.label)}">${esc(text)}</a>`;
+
+/** The fiber grid: indexed fiber pages grouped by fiber. The homepage's Browse section and /app both show it. */
+export function fiberGridHtml(pages) {
   const fiberPages = pages.filter(p => p.fiber && p.indexable);
   const groups = FAMILIES.map(([f]) => [f, fiberPages.filter(p => p.fiber === f)]).filter(([, ps]) => ps.length);
-  const a = (p, text) => `<a class="browse-link" href="/${p.slug}/" title="${esc(p.label)}">${esc(text)}</a>`;
-  const fibers = groups.map(([f, ps]) => `      <div class="browse-group">
+  return groups.map(([f, ps]) => `      <div class="browse-group">
         <p class="browse-fiber">100% ${esc(f)}</p>
         <div class="browse-grid">
-${ps.map(p => `          ${a(p, p.gender ? `${p.noun} for ${p.gender}` : p.noun)}`).join('\n')}
+${ps.map(p => `          ${browseLink(p, p.gender ? `${p.noun} for ${p.gender}` : p.noun)}`).join('\n')}
         </div>
       </div>`).join('\n');
-  const brandsHtml = pages.filter(p => p.name).map(p => `        ${a(p, p.name)}`).join('\n');
-  return `${fibers}
+}
+
+/** The homepage Browse section's links: the fiber grid, then every brand page, alphabetical. */
+function browseHtml(pages) {
+  const brandsHtml = pages.filter(p => p.name).map(p => `        ${browseLink(p, p.name)}`).join('\n');
+  return `${fiberGridHtml(pages)}
       <p class="section-label" style="margin-top:2.5rem; margin-bottom:1rem;">By brand</p>
       <div class="browse-grid">
 ${brandsHtml}
       </div>`;
 }
 
-function sitemap(pages, updatedIso) {
-  const urls = ['/', '/privacy', '/terms', ...pages.filter(p => p.indexable).map(p => `/${p.slug}/`)];
+// /app is noindex (ad traffic only) but listed in the sitemap all the same, by request.
+export function sitemap(pages, updatedIso) {
+  const urls = ['/', '/privacy', '/terms', `/${ADS_SLUG}/`, ...pages.filter(p => p.indexable).map(p => `/${p.slug}/`)];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `  <url><loc>${SITE}${u}</loc><lastmod>${updatedIso}</lastmod></url>`).join('\n')}
@@ -598,7 +720,7 @@ async function main() {
     ...brandNames.map(name => brandPage(name, byBrand.get(name), brands, blurbs,
       fiberBases.filter(p => brandFacts.get(name).fibers.has(p.fiber)).slice(0, 12).map(link), updated)),
   ];
-  const slugs = pages.map(p => p.slug);
+  const slugs = [ADS_SLUG, ...pages.map(p => p.slug)];
   const clash = slugs.find((x, i) => slugs.indexOf(x) !== i);
   if (clash) throw new Error(`two pages share the URL /${clash}/`);
 
@@ -623,6 +745,9 @@ async function main() {
     fs.mkdirSync(path.join(out, p.slug), { recursive: true });
     fs.writeFileSync(path.join(out, p.slug, 'index.html'), p.html);
   }
+  const ads = adsPage({ pieces: rows.length, brands: byBrand.size, grid: fiberGridHtml(pages), updated });
+  fs.mkdirSync(path.join(out, ads.slug), { recursive: true });
+  fs.writeFileSync(path.join(out, ads.slug, 'index.html'), ads.html);
   fs.writeFileSync(path.join(out, 'sitemap.xml'), sitemap(pages, now.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' })));
   fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
 
@@ -631,7 +756,7 @@ async function main() {
   console.log(`\n  ${rows.length.toLocaleString('en-US')} live rows · purity ${JSON.stringify(tally)}\n`);
   for (const p of pages) console.log(`  ${p.indexable ? 'index  ' : 'NOINDEX'}  ${String(p.styles).padStart(5)} styles  ${String(p.brands).padStart(3)} brands  /${p.slug}/`);
   const n = pages.filter(p => p.indexable).length;
-  console.log(`\n  wrote ${pages.length} pages to ${out}: ${n} indexed, ${pages.length - n} noindex · ${plans.length} fiber, ${brandNames.length} brand\n`);
+  console.log(`\n  wrote ${pages.length} pages to ${out}: ${n} indexed, ${pages.length - n} noindex · ${plans.length} fiber, ${brandNames.length} brand · /app/ (noindex): ${countLine(rows.length, byBrand.size)}\n`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

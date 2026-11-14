@@ -175,3 +175,57 @@ footer { background: var(--cream); padding: 2rem 1rem; text-align: center; }
 .footer-links a:hover { color: var(--brown); }
 .footer-note { font-size: 12px; color: var(--light-text); max-width: 560px; margin: 0 auto 0.75rem; }
 .footer-copy { font-size: 12px; color: var(--taupe); opacity: 0.7; }
+
+/* ADS LANDING (/app). Phone-first: headline, count, badge and searches fit one
+   phone screen; the fiber grid (index.html's browse rules, copied) sits below. */
+.ads-hero {
+  min-height: calc(100svh - 64px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1rem 2.5rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.ads-headline {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+  font-size: clamp(32px, 9vw, 54px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  color: var(--brown);
+  margin-bottom: 1rem;
+}
+.ads-count { font-size: 17px; color: var(--text); margin-bottom: 1.75rem; }
+.ads-badge { display: inline-block; line-height: 0; margin-bottom: 2rem; }
+.ads-badge img { width: 180px; height: auto; }
+.ads-try { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--taupe); margin-bottom: 0.75rem; }
+.ads-searches { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.ads-search {
+  background: var(--cream);
+  color: var(--brown);
+  border-radius: 22px;
+  padding: 11px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.ads-search::before { content: "⌕ "; opacity: 0.7; }
+.ads-fibers { max-width: 900px; margin: 1rem auto 0; text-align: center; }
+.ads-fibers .section-sub { margin-left: auto; margin-right: auto; margin-bottom: 2rem; }
+.browse-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.browse-link {
+  background: white;
+  border: 1px solid var(--cream);
+  color: var(--brown);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+.browse-link:hover { border-color: var(--taupe); }
+.browse-group { margin-bottom: 1.75rem; }
+.browse-fiber { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--brown); text-align: center; margin-bottom: 0.75rem; }
