@@ -6,7 +6,7 @@
  */
 import assert from 'node:assert/strict';
 import { purity, baseName, slugify, resolveAffiliateUrl, sizedImage, readAll,
-  adsPage, countLine, appSearchLink, fiberGridHtml, sitemap, ADS_SEARCHES, PIXEL_EVENTS, PIXEL_HEAD } from './build-site.mjs';
+  adsPage, countLine, appSearchLink, fiberGridHtml, sitemap, ADS_SEARCHES, PIXEL_EVENTS, PIXEL_HEAD, brandOpener } from './build-site.mjs';
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -89,6 +89,16 @@ test('images are asked for at 480px where the host resizes', () => {
   assert.equal(sizedImage('https://images.quince.com/x/y/W-PNT.jpg'), 'https://images.quince.com/x/y/W-PNT.jpg?w=480&fm=webp');
   assert.equal(sizedImage('https://static.wearpact.com/img/a.jpg'), 'https://static.wearpact.com/img/a.jpg');
   assert.equal(sizedImage(null), null);
+});
+
+test('brand page opener by the share of styles that are 100% one fiber: ≥90%, 60–89%, under 60%', () => {
+  assert.equal(brandOpener(90, 100), 'Almost all of it.');
+  assert.equal(brandOpener(99, 100), 'Almost all of it.');
+  assert.equal(brandOpener(89, 100), 'Mostly.');
+  assert.equal(brandOpener(60, 100), 'Mostly.');
+  assert.equal(brandOpener(59, 100), 'Not everything.');
+  assert.equal(brandOpener(0, 100), 'Not everything.');
+  assert.equal(brandOpener(0, 0), 'Not everything.');
 });
 
 test('slugs and affiliate links', () => {

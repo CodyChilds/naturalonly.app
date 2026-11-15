@@ -474,6 +474,12 @@ ${shown.map(s => card(s)).join('\n')}
     html: layout({ slug: spec.slug, title, description, h1: cap(spec.label), lead, body, indexable, related, updated }) };
 }
 
+/** A brand page's opener, by the share of its styles in naturalonly that are 100% one fiber. Pure; tested. */
+export function brandOpener(qualifying, total) {
+  const share = total ? qualifying / total : 0;
+  return share >= 0.9 ? 'Almost all of it.' : share >= 0.6 ? 'Mostly.' : 'Not everything.';
+}
+
 function brandPage(name, rows, brands, blurbs, related, updated) {
   const mine = rows.filter(r => r.brand === name);
   const all = toStyles(mine, brands);
@@ -498,7 +504,7 @@ function brandPage(name, rows, brands, blurbs, related, updated) {
   if (blends.length) parts.push(`${blends.length.toLocaleString('en-US')} ${blends.length === 1 ? 'is a blend' : 'are blends'} of natural fibers`);
   const answer = mainN === all.length && all.length
     ? `Every one of the ${plural(all.length, `${name} style`)} we list is 100% ${main}. That isn't ${name}'s whole catalog: naturalonly lists natural-fiber clothing only.`
-    : `Not everything. Of the ${plural(all.length, `${name} style`)} in stock in naturalonly, ${parts.join(', ').replace(/, ([^,]*)$/, ', and $1')}.${leftOut ? ` ${leftOut.toLocaleString('en-US')} more contain elastane or don't state their fabric fully, so they're left off this page.` : ''} naturalonly lists natural-fiber clothing only — anything with polyester, nylon or acrylic never appears here.`;
+    : `${brandOpener(singles.length, all.length)} Of the ${plural(all.length, `${name} style`)} in stock in naturalonly, ${parts.join(', ').replace(/, ([^,]*)$/, ', and $1')}.${leftOut ? ` ${leftOut.toLocaleString('en-US')} more are blends or list a fabric we couldn't verify, so they're left off this page.` : ''} naturalonly lists natural-fiber clothing only — anything with polyester, nylon or acrylic never appears here.`;
   const { blurb, catalog_note: note } = blurbs[name] || {};
   const lead = `<p class="page-lead"><strong>${esc(answer.split('.')[0])}.</strong>${esc(answer.slice(answer.indexOf('.') + 1))}</p>${blurb ? `\n    <p class="brand-blurb">${esc(blurb)}</p>` : ''}${note ? `\n    <p class="brand-blurb">${esc(note)}</p>` : ''}`;
 
