@@ -6,7 +6,9 @@
  */
 import assert from 'node:assert/strict';
 import { purity, baseName, slugify, resolveAffiliateUrl, sizedImage, readAll,
-  adsPage, countLine, appSearchLink, fiberGridHtml, sitemap, ADS_SEARCHES, PIXEL_EVENTS, PIXEL_HEAD, brandOpener } from './build-site.mjs';
+  adsPage, countLine, appSearchLink, fiberGridHtml, sitemap, ADS_SEARCHES, PIXEL_EVENTS, PIXEL_HEAD, brandOpener,
+  appleAppSiteAssociation, AASA_PATH } from './build-site.mjs';
+import { readFileSync } from 'node:fs';
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -247,6 +249,34 @@ test('pixel: a double tap or a second chip within a second sends one search; a r
   tap(chip, 5100, 'auxclick', 2);
   tap(chip, 6500);
   assert.equal(sent.length, 2);
+});
+
+// apple-app-site-association (app 1.0.7). A small model of Apple's component
+// matching: '/' is the exact path, '?' maps a param to a pattern where '?' is
+// one character and '*' any run, and every listed param must match.
+function claimed(aasa, url) {
+  const u = new URL(url, 'https://naturalonly.app');
+  const glob = (p) => new RegExp('^' + p.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\?/g, '.').replace(/\*/g, '.*') + '$');
+  return aasa.applinks.details.some((d) => d.components.some((c) =>
+    glob(c['/']).test(u.pathname) &&
+    Object.entries(c['?'] || {}).every(([k, p]) => u.searchParams.has(k) && glob(p).test(u.searchParams.get(k)))));
+}
+
+test('AASA: the app id is team 9QFXN8AZX2 + app.naturalonly', () => {
+  assert.deepEqual(appleAppSiteAssociation().applinks.details.map((d) => d.appIDs), [['9QFXN8AZX2.app.naturalonly']]);
+});
+
+test('AASA claims /app only with a non-empty q', () => {
+  const a = appleAppSiteAssociation();
+  for (const url of ['/app?q=linen%20dress', '/app/?q=linen', "/app?utm_source=meta&q=men's%20wool%20sweater"]) assert.ok(claimed(a, url), url);
+  for (const url of ['/app', '/app/', '/app?q=', '/app?utm_source=meta', '/', '/100-percent-linen-dresses/?q=linen', '/privacy', '/brands/kowtow/'])
+    assert.ok(!claimed(a, url), url);
+});
+
+test('AASA is written at the path Apple fetches, no extension, as JSON', () => {
+  assert.equal(AASA_PATH, '.well-known/apple-app-site-association');
+  const src = readFileSync(new URL('./build-site.mjs', import.meta.url), 'utf8');
+  assert.match(src, /fs\.writeFileSync\(path\.join\(out, AASA_PATH\), JSON\.stringify\(appleAppSiteAssociation\(\), null, 2\)/);
 });
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

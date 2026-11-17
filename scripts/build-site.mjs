@@ -646,6 +646,33 @@ ${grid}
   return { slug: ADS_SLUG, html };
 }
 
+// ── apple-app-site-association: app 1.0.7 universal links ───────────────────
+// Lets naturalonly.app/app?q=… open the app's search when it is installed
+// (the app claims applinks:naturalonly.app; its app/+native-intent.tsx routes
+// the link to Discover). Only /app WITH a non-empty q is claimed: the plain
+// /app landing page, and every other page, stay on the web. iOS fetches this
+// through Apple's CDN at install, so a change reaches phones only slowly.
+
+export const APPLE_TEAM_ID = '9QFXN8AZX2';
+export const APP_BUNDLE_ID = 'app.naturalonly';
+export const AASA_PATH = '.well-known/apple-app-site-association';
+
+export function appleAppSiteAssociation() {
+  // '?*' is one or more characters, so ?q= with nothing after it is not claimed.
+  const q = { q: '?*' };
+  return {
+    applinks: {
+      details: [{
+        appIDs: [`${APPLE_TEAM_ID}.${APP_BUNDLE_ID}`],
+        components: [
+          { '/': '/app', '?': q, comment: 'the /app search chips' },
+          { '/': '/app/', '?': q, comment: 'the same, with the trailing slash Pages adds' },
+        ],
+      }],
+    },
+  };
+}
+
 // ── main ─────────────────────────────────────────────────────────────────────
 
 const BROWSE_MARKER = '<!-- Browse links: written here by scripts/build-site.mjs -->';
@@ -755,6 +782,9 @@ async function main() {
   fs.mkdirSync(path.join(out, ads.slug), { recursive: true });
   fs.writeFileSync(path.join(out, ads.slug, 'index.html'), ads.html);
   fs.writeFileSync(path.join(out, 'sitemap.xml'), sitemap(pages, now.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' })));
+  // No extension, as Apple requires; Pages serves it over HTTPS without a redirect.
+  fs.mkdirSync(path.join(out, path.dirname(AASA_PATH)), { recursive: true });
+  fs.writeFileSync(path.join(out, AASA_PATH), JSON.stringify(appleAppSiteAssociation(), null, 2) + '\n');
   fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
 
   const tally = {};
