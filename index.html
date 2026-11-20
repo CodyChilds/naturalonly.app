@@ -692,9 +692,13 @@
         },
         body: JSON.stringify({ email: email })
       }).then(function (res) {
-        // Google Tag Manager (scripts/build-site.mjs): a lead only when the row
-        // went in. The message shows either way, as before.
-        if (res.ok) { window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'waitlist_signup' }); }
+        // Google Tag Manager and the Google tag (scripts/build-site.mjs): a lead
+        // only when the row went in, as the dataLayer event and the Google Ads
+        // conversion. The message shows either way, as before.
+        if (res.ok) {
+          window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'waitlist_signup' });
+          if (typeof window.gtag === 'function') window.gtag('event', 'conversion', { send_to: 'AW-18579872680/KcC1CM3ynbwdEKi3yZtF' });
+        }
         showSuccess();
       }).catch(showSuccess);
     }

@@ -84,17 +84,29 @@ const PIXEL_MARKER = '<!-- OpenAI Ads pixel: inserted here by scripts/build-site
 // dataLayer event when the insert succeeds (named apart from the OpenAI pixel's
 // lead_created, an App Store tap, 2026-11-19); what GTM does with it is set up
 // in the container, not here.
+//
+// The Google tag (gtag.js) for Google Ads AW-18579872680 (Cody, 2026-11-20) goes
+// right after GTM's script on every page: the container loads only gtm.js and an
+// Ads remarketing pixel, so window.gtag was undefined. It defines gtag, and
+// index.html's waitlist calls gtag('event', 'conversion', …) beside the
+// dataLayer push. The conversion is sent here, on the page; a GTM conversion tag
+// on waitlist_signup as well would count every signup twice.
 export const GTM_ID = 'GTM-WC8438HQ';
+export const GOOGLE_ADS_ID = 'AW-18579872680';
+export const WAITLIST_CONVERSION = `${GOOGLE_ADS_ID}/KcC1CM3ynbwdEKi3yZtF`;
+export const GTAG_HEAD = `<!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '${GOOGLE_ADS_ID}');</script>`;
 export const GTM_HEAD = `<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');</script><!-- End Google Tag Manager -->`;
 export const GTM_BODY = `<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->`;
 
-/** A page with both GTM snippets, once each. Throws on a page without <head>
- *  and <body> tags, or one that already carries the container. Pure; tested. */
+/** A page with both GTM snippets and the Google tag, once each. Throws on a page
+ *  without <head> and <body> tags, or one that already carries either. Pure; tested. */
 export function withGtm(html) {
   const head = /<head(?:\s[^>]*)?>/i, body = /<body(?:\s[^>]*)?>/i;
   if (!head.test(html) || !body.test(html)) throw new Error('page has no <head> or <body> tag for Google Tag Manager');
   if (html.includes(GTM_ID)) throw new Error(`page already carries ${GTM_ID}`);
-  return html.replace(head, m => `${m}\n  ${GTM_HEAD}`).replace(body, m => `${m}\n  ${GTM_BODY}`);
+  // the script URL, not the bare id: index.html's conversion call names the id too
+  if (html.includes(`gtag/js?id=${GOOGLE_ADS_ID}`)) throw new Error(`page already carries the Google tag for ${GOOGLE_ADS_ID}`);
+  return html.replace(head, m => `${m}\n  ${GTM_HEAD}\n  ${GTAG_HEAD}`).replace(body, m => `${m}\n  ${GTM_BODY}`);
 }
 
 /** Every HTML file the build writes goes through here. */

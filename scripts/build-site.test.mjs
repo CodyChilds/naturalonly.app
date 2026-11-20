@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict';
 import { purity, baseName, slugify, resolveAffiliateUrl, sizedImage, readAll,
   adsPage, countLine, appSearchLink, fiberGridHtml, sitemap, ADS_SEARCHES, PIXEL_EVENTS, PIXEL_HEAD, brandOpener,
-  appleAppSiteAssociation, AASA_PATH, GTM_ID, GTM_HEAD, GTM_BODY, withGtm } from './build-site.mjs';
+  appleAppSiteAssociation, AASA_PATH, GTM_ID, GTM_HEAD, GTM_BODY, withGtm, GOOGLE_ADS_ID, GTAG_HEAD, WAITLIST_CONVERSION } from './build-site.mjs';
 import { readFileSync } from 'node:fs';
 
 let passed = 0, failed = 0;
@@ -269,7 +269,11 @@ test('GTM: both snippets, once each, at the top of <head> and right after <body>
   const page = '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n</head>\n<body class="x">\n  <header class="page-head"></header>\n</body>\n</html>';
   const out = withGtm(page);
   assert.equal(out.split(GTM_ID).length - 1, 2, 'the script and the noscript iframe');
-  assert.ok(out.includes(`<head>\n  ${GTM_HEAD}\n  <meta charset`), 'first thing in <head>');
+  assert.ok(out.includes(`<head>\n  ${GTM_HEAD}\n  ${GTAG_HEAD}\n  <meta charset`), 'first thing in <head>, the Google tag right after');
+  assert.equal(GOOGLE_ADS_ID, 'AW-18579872680');
+  assert.equal(out.split('gtag/js?id=AW-18579872680').length - 1, 1, 'gtag.js once');
+  assert.match(GTAG_HEAD, /function gtag\(\)\{dataLayer\.push\(arguments\);\}gtag\('js', new Date\(\)\);gtag\('config', 'AW-18579872680'\);/);
+  assert.throws(() => withGtm(page.replace('</head>', `${GTAG_HEAD}</head>`)), /already carries the Google tag for AW-/);
   assert.ok(out.includes(`<body class="x">\n  ${GTM_BODY}\n  <header`), 'first thing in <body>, not in <header>');
   assert.match(GTM_HEAD, /googletagmanager\.com\/gtm\.js\?id='\+i\+dl/);
   assert.match(GTM_HEAD, /\(window,document,'script','dataLayer','GTM-WC8438HQ'\)/);
@@ -287,6 +291,7 @@ test('GTM: every HTML file the build writes goes through writeHtml', () => {
   for (const f of ['index.html', 'privacy.html', 'terms.html', 'confirmed.html']) {
     const html = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
     assert.ok(!html.includes(GTM_ID), `${f} must not carry its own copy`);
+    assert.ok(!html.includes('gtag/js'), `${f} must not carry its own Google tag`);
     withGtm(html);   // throws if the page has no <head>/<body>
   }
 });
@@ -296,7 +301,7 @@ atest('GTM: the Android waitlist pushes waitlist_signup only when the insert suc
   const s = html.slice(html.indexOf('function handleSignup'));
   const script = s.slice(0, s.indexOf('</script>'));
   const run = async (res) => {
-    const window = {}; let shown = 0;
+    const gtagCalls = []; const window = { gtag: (...a) => gtagCalls.push(a) }; let shown = 0;
     const fetch = () => (res instanceof Error ? Promise.reject(res) : Promise.resolve(res));
     const input = { value: 'a@b.co', style: {} };
     const document = { getElementById: () => input };
@@ -304,12 +309,13 @@ atest('GTM: the Android waitlist pushes waitlist_signup only when the insert suc
       `${script}; return handleSignup;`)(window, document, fetch, () => { shown++; }, 'https://x', 'key');
     fn();
     await new Promise(r => setTimeout(r, 0));
-    return { pushed: window.dataLayer || [], shown };
+    return { pushed: window.dataLayer || [], shown, gtagCalls };
   };
   return Promise.all([run({ ok: true }), run({ ok: false, status: 409 }), run(new Error('offline'))]).then(([ok, dup, off]) => {
     assert.deepEqual(ok.pushed, [{ event: 'waitlist_signup' }]); assert.equal(ok.shown, 1);
-    assert.deepEqual(dup.pushed, []); assert.equal(dup.shown, 1);
-    assert.deepEqual(off.pushed, []); assert.equal(off.shown, 1);
+    assert.deepEqual(ok.gtagCalls, [['event', 'conversion', { send_to: WAITLIST_CONVERSION }]], 'one Google Ads conversion');
+    assert.deepEqual(dup.pushed, []); assert.equal(dup.shown, 1); assert.deepEqual(dup.gtagCalls, []);
+    assert.deepEqual(off.pushed, []); assert.equal(off.shown, 1); assert.deepEqual(off.gtagCalls, []);
   });
 });
 
