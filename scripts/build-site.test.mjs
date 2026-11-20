@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict';
 import { purity, baseName, slugify, resolveAffiliateUrl, sizedImage, readAll,
   adsPage, countLine, appSearchLink, fiberGridHtml, sitemap, ADS_SEARCHES, PIXEL_EVENTS, PIXEL_HEAD, brandOpener,
-  appleAppSiteAssociation, AASA_PATH } from './build-site.mjs';
+  appleAppSiteAssociation, AASA_PATH, GTM_ID, GTM_HEAD, GTM_BODY, withGtm } from './build-site.mjs';
 import { readFileSync } from 'node:fs';
 
 let passed = 0, failed = 0;
@@ -15,6 +15,8 @@ function test(name, fn) {
   try { fn(); passed++; console.log(`  ok   ${name}`); }
   catch (e) { failed++; console.log(`  FAIL ${name}\n       ${e.message}`); }
 }
+const asyncTests = [];
+const atest = (name, fn) => asyncTests.push([name, fn]);   // run, awaited, after the sync tests
 console.log('\nbuild-site\n');
 
 test('100% of one fiber is single, whatever the wording', () => {
@@ -262,6 +264,55 @@ function claimed(aasa, url) {
     Object.entries(c['?'] || {}).every(([k, p]) => u.searchParams.has(k) && glob(p).test(u.searchParams.get(k)))));
 }
 
+test('GTM: both snippets, once each, at the top of <head> and right after <body>', () => {
+  assert.equal(GTM_ID, 'GTM-WC8438HQ');
+  const page = '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n</head>\n<body class="x">\n  <header class="page-head"></header>\n</body>\n</html>';
+  const out = withGtm(page);
+  assert.equal(out.split(GTM_ID).length - 1, 2, 'the script and the noscript iframe');
+  assert.ok(out.includes(`<head>\n  ${GTM_HEAD}\n  <meta charset`), 'first thing in <head>');
+  assert.ok(out.includes(`<body class="x">\n  ${GTM_BODY}\n  <header`), 'first thing in <body>, not in <header>');
+  assert.match(GTM_HEAD, /googletagmanager\.com\/gtm\.js\?id='\+i\+dl/);
+  assert.match(GTM_HEAD, /\(window,document,'script','dataLayer','GTM-WC8438HQ'\)/);
+  assert.match(GTM_BODY, /<noscript><iframe src="https:\/\/www\.googletagmanager\.com\/ns\.html\?id=GTM-WC8438HQ"/);
+  assert.throws(() => withGtm('<html><body></body></html>'), /no <head> or <body>/);
+  assert.throws(() => withGtm(out), /already carries/);
+});
+
+test('GTM: every HTML file the build writes goes through writeHtml', () => {
+  const src = readFileSync(new URL('./build-site.mjs', import.meta.url), 'utf8');
+  const main = src.slice(src.indexOf('fs.rmSync(out'));
+  assert.equal((main.match(/writeHtml\(/g) || []).length, 4, 'static pages, index, generated pages, /app');
+  assert.doesNotMatch(main, /writeFileSync\([^)]*'index\.html'/, 'no HTML written around it');
+  assert.match(main, /if \(f\.endsWith\('\.html'\)\)/);
+  for (const f of ['index.html', 'privacy.html', 'terms.html', 'confirmed.html']) {
+    const html = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+    assert.ok(!html.includes(GTM_ID), `${f} must not carry its own copy`);
+    withGtm(html);   // throws if the page has no <head>/<body>
+  }
+});
+
+atest('GTM: the Android waitlist pushes lead_created only when the insert succeeds', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const s = html.slice(html.indexOf('function handleSignup'));
+  const script = s.slice(0, s.indexOf('</script>'));
+  const run = async (res) => {
+    const window = {}; let shown = 0;
+    const fetch = () => (res instanceof Error ? Promise.reject(res) : Promise.resolve(res));
+    const input = { value: 'a@b.co', style: {} };
+    const document = { getElementById: () => input };
+    const fn = new Function('window', 'document', 'fetch', 'showSuccess', 'SUPABASE_URL', 'SUPABASE_ANON_KEY',
+      `${script}; return handleSignup;`)(window, document, fetch, () => { shown++; }, 'https://x', 'key');
+    fn();
+    await new Promise(r => setTimeout(r, 0));
+    return { pushed: window.dataLayer || [], shown };
+  };
+  return Promise.all([run({ ok: true }), run({ ok: false, status: 409 }), run(new Error('offline'))]).then(([ok, dup, off]) => {
+    assert.deepEqual(ok.pushed, [{ event: 'lead_created' }]); assert.equal(ok.shown, 1);
+    assert.deepEqual(dup.pushed, []); assert.equal(dup.shown, 1);
+    assert.deepEqual(off.pushed, []); assert.equal(off.shown, 1);
+  });
+});
+
 test('AASA: the app id is team 9QFXN8AZX2 + app.naturalonly', () => {
   assert.deepEqual(appleAppSiteAssociation().applinks.details.map((d) => d.appIDs), [['9QFXN8AZX2.app.naturalonly']]);
 });
@@ -279,5 +330,9 @@ test('AASA is written at the path Apple fetches, no extension, as JSON', () => {
   assert.match(src, /fs\.writeFileSync\(path\.join\(out, AASA_PATH\), JSON\.stringify\(appleAppSiteAssociation\(\), null, 2\)/);
 });
 
+for (const [name, fn] of asyncTests) {
+  try { await fn(); passed++; console.log(`  ok   ${name}`); }
+  catch (e) { failed++; console.log(`  FAIL ${name}\n       ${e.message}`); }
+}
 console.log(`\n${passed} passed, ${failed} failed\n`);
 process.exit(failed ? 1 : 0);

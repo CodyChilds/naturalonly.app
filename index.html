@@ -691,7 +691,12 @@
           'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
         },
         body: JSON.stringify({ email: email })
-      }).then(showSuccess).catch(showSuccess);
+      }).then(function (res) {
+        // Google Tag Manager (scripts/build-site.mjs): a lead only when the row
+        // went in. The message shows either way, as before.
+        if (res.ok) { window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'lead_created' }); }
+        showSuccess();
+      }).catch(showSuccess);
     }
   </script>
 

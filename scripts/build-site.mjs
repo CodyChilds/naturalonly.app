@@ -72,6 +72,32 @@ export const PIXEL_EVENTS = `<script>
   </script>`;
 const PIXEL_MARKER = '<!-- OpenAI Ads pixel: inserted here by scripts/build-site.mjs -->';
 
+// ── Google Tag Manager ───────────────────────────────────────────────────────
+// Container GTM-WC8438HQ (2026-11-19) on EVERY page the build writes: generated
+// pages, /app/, and the hand-written ones (index, privacy, terms, confirmed),
+// added at write time (writeHtml) so no page can miss it. Google's two
+// snippets: the script as high in <head> as possible, the noscript iframe
+// right after <body>. index.html's Android waitlist pushes a 'lead_created'
+// dataLayer event when the insert succeeds; what GTM does with it is set up
+// in the container, not here.
+export const GTM_ID = 'GTM-WC8438HQ';
+export const GTM_HEAD = `<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');</script><!-- End Google Tag Manager -->`;
+export const GTM_BODY = `<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->`;
+
+/** A page with both GTM snippets, once each. Throws on a page without <head>
+ *  and <body> tags, or one that already carries the container. Pure; tested. */
+export function withGtm(html) {
+  const head = /<head(?:\s[^>]*)?>/i, body = /<body(?:\s[^>]*)?>/i;
+  if (!head.test(html) || !body.test(html)) throw new Error('page has no <head> or <body> tag for Google Tag Manager');
+  if (html.includes(GTM_ID)) throw new Error(`page already carries ${GTM_ID}`);
+  return html.replace(head, m => `${m}\n  ${GTM_HEAD}`).replace(body, m => `${m}\n  ${GTM_BODY}`);
+}
+
+/** Every HTML file the build writes goes through here. */
+function writeHtml(file, html) {
+  fs.writeFileSync(file, withGtm(html));
+}
+
 // ── purity ───────────────────────────────────────────────────────────────────
 
 /** Natural fiber families, as material text names them. Order is display order. */
@@ -769,18 +795,22 @@ async function main() {
 
   fs.rmSync(out, { recursive: true, force: true });
   fs.mkdirSync(out, { recursive: true });
-  for (const f of STATIC_FILES) if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(out, f));
+  for (const f of STATIC_FILES) {
+    if (!fs.existsSync(path.join(ROOT, f))) continue;
+    if (f.endsWith('.html')) { if (f !== 'index.html') writeHtml(path.join(out, f), fs.readFileSync(path.join(ROOT, f), 'utf8')); }
+    else fs.copyFileSync(path.join(ROOT, f), path.join(out, f));
+  }
   // index.html gets the same pixel as the generated pages, from this one copy.
   if (!source.includes(PIXEL_MARKER) || !source.includes('</body>')) throw new Error('index.html is missing the pixel marker comment or </body>');
-  fs.writeFileSync(path.join(out, 'index.html'), source.replace(BROWSE_MARKER, () => browseHtml(pages))
+  writeHtml(path.join(out, 'index.html'), source.replace(BROWSE_MARKER, () => browseHtml(pages))
     .replace(PIXEL_MARKER, PIXEL_HEAD).replace('</body>', `  ${PIXEL_EVENTS}\n</body>`));
   for (const p of pages) {
     fs.mkdirSync(path.join(out, p.slug), { recursive: true });
-    fs.writeFileSync(path.join(out, p.slug, 'index.html'), p.html);
+    writeHtml(path.join(out, p.slug, 'index.html'), p.html);
   }
   const ads = adsPage({ pieces: rows.length, brands: byBrand.size, grid: fiberGridHtml(pages), updated });
   fs.mkdirSync(path.join(out, ads.slug), { recursive: true });
-  fs.writeFileSync(path.join(out, ads.slug, 'index.html'), ads.html);
+  writeHtml(path.join(out, ads.slug, 'index.html'), ads.html);
   fs.writeFileSync(path.join(out, 'sitemap.xml'), sitemap(pages, now.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' })));
   // No extension, as Apple requires; Pages serves it over HTTPS without a redirect.
   fs.mkdirSync(path.join(out, path.dirname(AASA_PATH)), { recursive: true });
