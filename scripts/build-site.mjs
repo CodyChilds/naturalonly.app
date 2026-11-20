@@ -44,6 +44,9 @@ const STATIC_FILES = ['index.html', 'privacy.html', 'terms.html', 'confirmed.htm
 // SDK's standard events (Ads Manager has no custom type); each one's data.type
 // must be its SDK category or the SDK drops it:
 //   lead_created      { type: 'customer_action' }  a tap on any App Store link
+//                     (the OpenAI SDK's standard name: renaming it would make it a
+//                     custom event Ads Manager can't optimise on. Not the GTM
+//                     dataLayer, whose waitlist event is 'waitlist_signup'.)
 //   checkout_started  { type: 'contents' }         a tap on any affiliate product link (rel="sponsored")
 // and one custom event, which the SDK takes but Ads Manager can't optimise on:
 //   custom "search"   { type: 'custom' }           a tap on a search chip (data-search), /app only
@@ -77,8 +80,9 @@ const PIXEL_MARKER = '<!-- OpenAI Ads pixel: inserted here by scripts/build-site
 // pages, /app/, and the hand-written ones (index, privacy, terms, confirmed),
 // added at write time (writeHtml) so no page can miss it. Google's two
 // snippets: the script as high in <head> as possible, the noscript iframe
-// right after <body>. index.html's Android waitlist pushes a 'lead_created'
-// dataLayer event when the insert succeeds; what GTM does with it is set up
+// right after <body>. index.html's Android waitlist pushes a 'waitlist_signup'
+// dataLayer event when the insert succeeds (named apart from the OpenAI pixel's
+// lead_created, an App Store tap, 2026-11-19); what GTM does with it is set up
 // in the container, not here.
 export const GTM_ID = 'GTM-WC8438HQ';
 export const GTM_HEAD = `<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');</script><!-- End Google Tag Manager -->`;

@@ -291,7 +291,7 @@ test('GTM: every HTML file the build writes goes through writeHtml', () => {
   }
 });
 
-atest('GTM: the Android waitlist pushes lead_created only when the insert succeeds', () => {
+atest('GTM: the Android waitlist pushes waitlist_signup only when the insert succeeds', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const s = html.slice(html.indexOf('function handleSignup'));
   const script = s.slice(0, s.indexOf('</script>'));
@@ -307,7 +307,7 @@ atest('GTM: the Android waitlist pushes lead_created only when the insert succee
     return { pushed: window.dataLayer || [], shown };
   };
   return Promise.all([run({ ok: true }), run({ ok: false, status: 409 }), run(new Error('offline'))]).then(([ok, dup, off]) => {
-    assert.deepEqual(ok.pushed, [{ event: 'lead_created' }]); assert.equal(ok.shown, 1);
+    assert.deepEqual(ok.pushed, [{ event: 'waitlist_signup' }]); assert.equal(ok.shown, 1);
     assert.deepEqual(dup.pushed, []); assert.equal(dup.shown, 1);
     assert.deepEqual(off.pushed, []); assert.equal(off.shown, 1);
   });
