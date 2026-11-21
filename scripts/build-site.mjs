@@ -581,19 +581,22 @@ ${shown.map(s => card(s, { showBrand: false, showFabric: true })).join('\n')}
 // ── /app: the paid-ads landing page ──────────────────────────────────────────
 // Phone-first: everything a tap needs sits above the fold, the fiber grid below.
 // noindex (ad traffic only). The App Store badge fires lead_created through the
-// shared pixel handler; a search chip fires the custom "search" event, opens the
-// app's search, and falls back to the App Store when the app does not open.
+// shared pixel handler; a search chip fires the custom "search" event and links
+// to go.naturalonly.app/app?q=…, a universal link (app 1.0.7): iOS opens the
+// app's search when it is installed, and otherwise the go. page sends the
+// visitor to the App Store. The chips cannot link to naturalonly.app itself:
+// iOS keeps a tap on a same-domain universal link in Safari.
 // utm_* params on the landing URL ride along on the App Store and app links.
 
 export const ADS_SLUG = 'app';
 export const ADS_SEARCHES = ['linen dress', "men's wool sweater", 'cotton pajamas'];
 const ADS_HEADLINE = '100% natural fibers. No polyester, no nylon, no acrylic.';
 const ELASTANE_NOTE = 'A small amount of elastane (up to 10%) is allowed for stretch. The 100% pages on this site list single-fiber pieces only.';
-const APP_OPEN_WAIT_MS = 1500;   // no hide by then: the app is not installed, go to the App Store
+export const APP_LINK_HOST = 'https://go.naturalonly.app';
 
-/** The app's search screen for a query (expo-router: app/(tabs)/discover.tsx reads ?query=). */
+/** The app's search for a query: the go. host's /app?q= (the app routes it to Discover; repo ~/go.naturalonly.app). */
 export function appSearchLink(query) {
-  return `naturalonly://discover?query=${encodeURIComponent(query)}`;
+  return `${APP_LINK_HOST}/app?q=${encodeURIComponent(query)}`;
 }
 
 /** "28,000+ pieces from 60 brands": pieces rounded down to the thousand, so the claim stays true; brands exact. */
@@ -659,26 +662,11 @@ ${grid}
   ${PIXEL_EVENTS}
   <script>
     (function () {
-      var STORE = ${JSON.stringify(APP_STORE)};
       var utm = new URLSearchParams();
       new URLSearchParams(location.search).forEach(function (v, k) { if (/^utm_/i.test(k)) utm.append(k, v); });
       function withUtm(href) { var q = utm.toString(); return q ? href + (href.indexOf('?') < 0 ? '?' : '&') + q : href; }
       document.querySelectorAll('a[href^="https://apps.apple.com/"], a[data-search]').forEach(function (a) {
         a.setAttribute('href', withUtm(a.getAttribute('href')));
-      });
-      // A chip opens the app's search; if the page is still showing when the wait
-      // is up, the app did not open, so go to the App Store. A redirect, not a tap:
-      // the pixel's handler has already sent "search" and sends nothing for it.
-      document.addEventListener('click', function (e) {
-        if (e.button !== 0) return;
-        var a = e.target.closest && e.target.closest('a[data-search]'); if (!a) return;
-        e.preventDefault();
-        var left = false;
-        function gone() { left = true; }
-        document.addEventListener('visibilitychange', function () { if (document.hidden) gone(); }, { once: true });
-        window.addEventListener('pagehide', gone, { once: true });
-        location.href = a.getAttribute('href');
-        setTimeout(function () { if (!left && !document.hidden) location.href = withUtm(STORE); }, ${APP_OPEN_WAIT_MS});
       });
     })();
   </script>

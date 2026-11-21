@@ -177,9 +177,9 @@ test('count line: pieces rounded down to the thousand, never up', () => {
   assert.equal(countLine(640, 3), '640 pieces from 3 brands. Search anything.');
 });
 
-test('app search links open discover with the query encoded', () => {
-  assert.equal(appSearchLink("men's wool sweater"), "naturalonly://discover?query=men's%20wool%20sweater");
-  assert.equal(appSearchLink('linen dress'), 'naturalonly://discover?query=linen%20dress');
+test('app search links are the go. host\'s /app?q=, query encoded (a different host: same-domain universal links stay in Safari)', () => {
+  assert.equal(appSearchLink("men's wool sweater"), "https://go.naturalonly.app/app?q=men's%20wool%20sweater");
+  assert.equal(appSearchLink('linen dress'), 'https://go.naturalonly.app/app?q=linen%20dress');
 });
 
 test('/app above the fold: headline, live count, badge to the App Store, three search chips', () => {
@@ -189,7 +189,7 @@ test('/app above the fold: headline, live count, badge to the App Store, three s
   const chips = [...ADS.matchAll(/<a class="ads-search" href="([^"]+)" data-search>([^<]+)<\/a>/g)];
   assert.deepEqual(chips.map(m => m[2].replace(/&#39;/g, "'")), ADS_SEARCHES);
   assert.deepEqual(ADS_SEARCHES, ['linen dress', "men's wool sweater", 'cotton pajamas']);
-  for (const m of chips) assert.ok(m[1].startsWith('naturalonly://discover?query='), m[1]);
+  for (const m of chips) assert.ok(m[1].startsWith('https://go.naturalonly.app/app?q='), m[1]);
   assert.ok(ADS.indexOf('ads-search') < ADS.indexOf('browse-group'), 'the chips come before the fiber grid');
 });
 
@@ -210,10 +210,12 @@ test('/app below the fold: the fiber grid (indexed fiber pages only, no brands);
   assert.ok(ADS.includes(PIXEL_HEAD) && ADS.includes(PIXEL_EVENTS));
 });
 
-test('/app carries utm_* params to the App Store and app links, and falls back to the App Store', () => {
+test('/app carries utm_* params to the App Store and app links; a chip is a plain link (no scheme, no timer)', () => {
   assert.match(ADS, /if \(\/\^utm_\/i\.test\(k\)\) utm\.append\(k, v\)/);
   assert.ok(ADS.includes(`a[href^="https://apps.apple.com/"], a[data-search]`));
-  assert.match(ADS, /location\.href = withUtm\(STORE\); \}, 1500\)/);
+  assert.doesNotMatch(ADS, /naturalonly:\/\/|preventDefault|setTimeout/);
+  // the go. host's AASA claims the chip URLs (same file as this site's)
+  for (const q of ADS_SEARCHES) assert.ok(claimed(appleAppSiteAssociation(), new URL(appSearchLink(q)).pathname + new URL(appSearchLink(q)).search), q);
 });
 
 // The pixel's tap handler, run against a stub document: one tap, one event.
